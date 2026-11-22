@@ -1,387 +1,544 @@
 <!DOCTYPE html>
 <html lang="hu">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Interaktív Fizika Feladatsor</title>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-<style>
-  :root {
-    --primary: #1a56db;
-    --primary-dark: #1e429f;
-    --bg: #f3f4f6;
-    --card: #ffffff;
-    --text: #1f2937;
-    --muted: #6b7280;
-    --border: #d1d5db;
-    --ok: #059669;
-    --ok-bg: #d1fae5;
-    --err: #dc2626;
-    --err-bg: #fee2e2;
-  }
-  * { box-sizing: border-box; }
-  body {
-    font-family: 'Segoe UI', Roboto, Arial, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    margin: 0;
-    padding: 0 0 60px 0;
-    line-height: 1.55;
-  }
-  .topbar {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background: #111827;
-    color: #fff;
-    padding: 12px 20px;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-  }
-  .topbar-title { font-weight: 700; font-size: 1.05rem; }
-  .topbar-stats {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    font-size: 0.95rem;
-  }
-  .badge {
-    background: var(--primary);
-    padding: 4px 12px;
-    border-radius: 999px;
-    font-weight: 700;
-  }
-  .container {
-    max-width: 880px;
-    margin: 24px auto;
-    padding: 0 16px;
-  }
-  .card {
-    background: var(--card);
-    border-radius: 12px;
-    padding: 22px 24px;
-    margin-bottom: 22px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
-    border: 1px solid #e5e7eb;
-  }
-  .card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 12px;
-    border-bottom: 2px solid #f3f4f6;
-    padding-bottom: 10px;
-    margin-bottom: 14px;
-  }
-  .card-title {
-    margin: 0;
-    font-size: 1.15rem;
-    color: #111827;
-  }
-  .pts-tag {
-    background: #e0e7ff;
-    color: var(--primary-dark);
-    font-weight: 700;
-    font-size: 0.85rem;
-    padding: 3px 10px;
-    border-radius: 6px;
-    white-space: nowrap;
-  }
-  .situation {
-    background: #eff6ff;
-    border-left: 4px solid var(--primary);
-    padding: 12px 16px;
-    border-radius: 0 8px 8px 0;
-    margin-bottom: 16px;
-    font-size: 0.96rem;
-  }
-  .svg-box {
-    text-align: center;
-    margin: 14px 0;
-    background: #fafafa;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    padding: 10px;
-    overflow-x: auto;
-  }
-  .svg-box svg { max-width: 100%; height: auto; }
-  .btn-row {
-    margin-top: 18px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    align-items: center;
-  }
-  button.btn {
-    border: none;
-    border-radius: 7px;
-    padding: 9px 18px;
-    font-size: 0.95rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.15s, opacity 0.15s;
-  }
-  .btn-check { background: var(--primary); color: #fff; }
-  .btn-check:hover { background: var(--primary-dark); }
-  .btn-check:disabled { background: #9ca3af; cursor: not-allowed; }
-  .btn-retry { background: #f59e0b; color: #fff; display: none; }
-  .btn-sol { background: #4b5563; color: #fff; display: none; }
-  .feedback {
-    margin-top: 12px;
-    padding: 10px 14px;
-    border-radius: 7px;
-    font-weight: 600;
-    display: none;
-  }
-  .feedback.ok { background: var(--ok-bg); color: var(--ok); display: block; }
-  .feedback.err { background: var(--err-bg); color: var(--err); display: block; }
-
-  /* Drag Words */
-  .word-bank {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    padding: 12px;
-    background: #f9fafb;
-    border: 1px dashed #9ca3af;
-    border-radius: 8px;
-    margin-bottom: 14px;
-    min-height: 46px;
-  }
-  .chip {
-    background: #dbeafe;
-    color: #1e3a8a;
-    border: 1px solid #93c5fd;
-    padding: 5px 12px;
-    border-radius: 6px;
-    font-weight: 600;
-    cursor: pointer;
-    user-select: none;
-  }
-  .chip.selected { outline: 3px solid var(--primary); background: #bfdbfe; }
-  .chip.used { opacity: 0.35; pointer-events: none; }
-  .drop-slot {
-    display: inline-block;
-    min-width: 110px;
-    height: 30px;
-    vertical-align: middle;
-    border-bottom: 2px solid var(--primary);
-    background: #f3f4f6;
-    border-radius: 4px 4px 0 0;
-    padding: 2px 8px;
-    text-align: center;
-    font-weight: 700;
-    color: var(--primary-dark);
-    cursor: pointer;
-    margin: 2px 4px;
-  }
-  .drop-slot.correct { background: var(--ok-bg); border-color: var(--ok); color: var(--ok); }
-  .drop-slot.wrong { background: var(--err-bg); border-color: var(--err); color: var(--err); }
-
-  /* Blanks */
-  input.blank-inp {
-    border: 1px solid #9ca3af;
-    border-radius: 5px;
-    padding: 4px 8px;
-    font-size: 0.95rem;
-    width: 145px;
-    margin: 2px 4px;
-  }
-  input.blank-inp.correct { background: var(--ok-bg); border-color: var(--ok); color: var(--ok); font-weight: 700; }
-  input.blank-inp.wrong { background: var(--err-bg); border-color: var(--err); color: var(--err); }
-
-  /* Group */
-  .group-pool {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    padding: 12px;
-    background: #f9fafb;
-    border: 1px dashed #9ca3af;
-    border-radius: 8px;
-    margin-bottom: 14px;
-  }
-  .group-item {
-    background: #fef3c7;
-    border: 1px solid #f59e0b;
-    color: #78350f;
-    padding: 6px 12px;
-    border-radius: 6px;
-    font-size: 0.92rem;
-    cursor: pointer;
-    user-select: none;
-  }
-  .group-item.selected { outline: 3px solid #d97706; }
-  .group-item.correct { background: var(--ok-bg); border-color: var(--ok); color: var(--ok); }
-  .group-item.wrong { background: var(--err-bg); border-color: var(--err); color: var(--err); }
-  .group-cols {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 14px;
-  }
-  .group-box {
-    border: 2px solid #cbd5e1;
-    border-radius: 8px;
-    padding: 12px;
-    min-height: 130px;
-    background: #f8fafc;
-    cursor: pointer;
-  }
-  .group-box h4 { margin: 0 0 10px 0; text-align: center; color: var(--primary-dark); }
-  .group-box .group-item { display: block; margin-bottom: 6px; }
-
-  /* Multi */
-  .multi-opt {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    padding: 9px 12px;
-    border: 1px solid #e5e7eb;
-    border-radius: 7px;
-    margin-bottom: 8px;
-    cursor: pointer;
-  }
-  .multi-opt:hover { background: #f9fafb; }
-  .multi-opt.correct { background: var(--ok-bg); border-color: var(--ok); }
-  .multi-opt.wrong { background: var(--err-bg); border-color: var(--err); }
-
-  /* Order */
-  .order-list { list-style: none; padding: 0; margin: 0; }
-  .order-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    background: #f8fafc;
-    border: 1px solid #cbd5e1;
-    border-radius: 7px;
-    padding: 10px 12px;
-    margin-bottom: 8px;
-  }
-  .order-item.correct { background: var(--ok-bg); border-color: var(--ok); }
-  .order-item.wrong { background: var(--err-bg); border-color: var(--err); }
-  .order-btns button {
-    background: #e2e8f0;
-    border: none;
-    border-radius: 4px;
-    padding: 4px 9px;
-    cursor: pointer;
-    font-weight: 700;
-  }
-
-  /* Hotspot */
-  .hotspot-wrap {
-    position: relative;
-    display: inline-block;
-    max-width: 100%;
-  }
-  .hs-pin {
-    position: absolute;
-    transform: translate(-50%, -50%);
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background: #dc2626;
-    color: #fff;
-    border: 2px solid #fff;
-    font-weight: 700;
-    font-size: 0.85rem;
-    cursor: pointer;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.35);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .hs-pin.answered { background: var(--primary); }
-  .hs-pin.correct { background: var(--ok); }
-  .hs-pin.wrong { background: var(--err); }
-  .hs-panel {
-    margin-top: 12px;
-    padding: 14px;
-    background: #f8fafc;
-    border: 1px solid #cbd5e1;
-    border-radius: 8px;
-    text-align: left;
-  }
-  .hs-select {
-    width: 100%;
-    max-width: 340px;
-    padding: 7px 10px;
-    border-radius: 6px;
-    border: 1px solid #9ca3af;
-    font-size: 0.95rem;
-  }
-
-  /* Crossword */
-  .cw-layout {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    align-items: flex-start;
-  }
-  .cw-grid {
-    border-collapse: collapse;
-    background: #1f2937;
-    padding: 4px;
-  }
-  .cw-cell {
-    width: 34px;
-    height: 34px;
-    border: 1px solid #374151;
-    position: relative;
-    background: #1f2937;
-    padding: 0;
-  }
-  .cw-cell.active { background: #fff; }
-  .cw-num {
-    position: absolute;
-    top: 1px;
-    left: 2px;
-    font-size: 0.65rem;
-    font-weight: 700;
-    color: #374151;
-    pointer-events: none;
-  }
-  .cw-inp {
-    width: 100%;
-    height: 100%;
-    border: none;
-    text-align: center;
-    font-size: 1rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    background: transparent;
-    color: #111827;
-    padding-top: 4px;
-  }
-  .cw-inp:focus { outline: 2px solid var(--primary); background: #eff6ff; }
-  .cw-cell.correct { background: var(--ok-bg); }
-  .cw-cell.wrong { background: var(--err-bg); }
-  .cw-clues { flex: 1; min-width: 240px; font-size: 0.93rem; }
-  .cw-clues h4 { margin: 0 0 6px 0; color: var(--primary-dark); }
-  .cw-clues ul { padding-left: 18px; margin: 0 0 12px 0; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fizika Szorgalmi Feladatlap</title>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <style>
+    :root {
+      --primary: #1a56db;
+      --primary-dark: #1e40af;
+      --accent: #cc0000;
+      --bg: #f3f4f6;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --ok: #15803d;
+      --ok-bg: #dcfce7;
+      --err: #b91c1c;
+      --err-bg: #fee2e2;
+      --border: #d1d5db;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding-bottom: 60px;
+    }
+    header {
+      background: linear-gradient(135deg, #1e3a8a, #1a56db);
+      color: #fff;
+      padding: 20px 16px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+    }
+    .header-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    .header-title h1 {
+      margin: 0;
+      font-size: 1.35rem;
+    }
+    .header-title p {
+      margin: 2px 0 0;
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+    .status-pill {
+      background: rgba(255,255,255,0.18);
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      display: flex;
+      gap: 14px;
+      align-items: center;
+    }
+    .container {
+      max-width: 900px;
+      margin: 24px auto;
+      padding: 0 16px;
+    }
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 22px;
+      margin-bottom: 22px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      border: 1px solid #e5e7eb;
+    }
+    .task-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      border-bottom: 2px solid #f3f4f6;
+      padding-bottom: 10px;
+      margin-bottom: 14px;
+    }
+    .task-title {
+      margin: 0;
+      font-size: 1.15rem;
+      color: #111827;
+    }
+    .task-points {
+      background: #eff6ff;
+      color: var(--primary);
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      white-space: nowrap;
+    }
+    .task-desc {
+      margin: 0 0 14px;
+      color: #374151;
+    }
+    .situation-box {
+      background: #f8fafc;
+      border-left: 4px solid var(--primary);
+      padding: 12px 16px;
+      border-radius: 6px;
+      margin-bottom: 16px;
+      font-style: italic;
+      color: #334155;
+    }
+    .svg-box {
+      margin: 14px 0 18px;
+      text-align: center;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 10px;
+      overflow-x: auto;
+    }
+    .svg-box svg {
+      max-width: 100%;
+      height: auto;
+    }
+    /* Drag Words */
+    .word-bank {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      background: #f8fafc;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px dashed #94a3b8;
+      margin-bottom: 16px;
+      min-height: 48px;
+    }
+    .word-chip {
+      background: #fff;
+      border: 1px solid var(--primary);
+      color: var(--primary-dark);
+      padding: 5px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      user-select: none;
+      transition: all 0.15s;
+    }
+    .word-chip:hover { background: #eff6ff; }
+    .word-chip.selected {
+      background: var(--primary);
+      color: #fff;
+    }
+    .word-chip.used {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+    .drop-slot {
+      display: inline-block;
+      min-width: 110px;
+      padding: 2px 10px;
+      margin: 2px 4px;
+      border-bottom: 2px solid var(--primary);
+      background: #eff6ff;
+      border-radius: 4px;
+      text-align: center;
+      font-weight: 600;
+      color: var(--primary-dark);
+      cursor: pointer;
+      vertical-align: baseline;
+    }
+    .drop-slot.correct {
+      background: var(--ok-bg);
+      border-color: var(--ok);
+      color: var(--ok);
+    }
+    .drop-slot.wrong {
+      background: var(--err-bg);
+      border-color: var(--err);
+      color: var(--err);
+    }
+    /* Blanks */
+    input.blank-input {
+      border: 1px solid #9ca3af;
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 0.98rem;
+      width: 145px;
+      margin: 2px 4px;
+      font-family: inherit;
+    }
+    input.blank-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(26,86,219,0.2);
+    }
+    input.blank-input.correct {
+      background: var(--ok-bg);
+      border-color: var(--ok);
+      color: var(--ok);
+      font-weight: 600;
+    }
+    input.blank-input.wrong {
+      background: var(--err-bg);
+      border-color: var(--err);
+      color: var(--err);
+    }
+    .blank-list-item {
+      margin-bottom: 12px;
+      padding: 10px 12px;
+      background: #f9fafb;
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+    }
+    /* Group */
+    .group-pool {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 12px;
+      background: #f8fafc;
+      border: 1px dashed #94a3b8;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      min-height: 52px;
+    }
+    .group-item {
+      background: #fff;
+      border: 1px solid #64748b;
+      padding: 7px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.94rem;
+      transition: all 0.15s;
+    }
+    .group-item.selected {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+    .group-item.correct {
+      background: var(--ok-bg);
+      border-color: var(--ok);
+      color: var(--ok);
+    }
+    .group-item.wrong {
+      background: var(--err-bg);
+      border-color: var(--err);
+      color: var(--err);
+    }
+    .group-buckets {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 14px;
+    }
+    .bucket {
+      border: 2px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 12px;
+      min-height: 150px;
+      background: #fcfcfd;
+      cursor: pointer;
+    }
+    .bucket h4 {
+      margin: 0 0 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #e2e8f0;
+      color: var(--primary-dark);
+      text-align: center;
+    }
+    .bucket-items {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    /* Multi */
+    .multi-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      background: #fff;
+    }
+    .multi-option:hover { background: #f9fafb; }
+    .multi-option.correct {
+      background: var(--ok-bg);
+      border-color: var(--ok);
+    }
+    .multi-option.wrong {
+      background: var(--err-bg);
+      border-color: var(--err);
+    }
+    /* Order */
+    .order-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .order-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: #f9fafb;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+    }
+    .order-row.correct {
+      background: var(--ok-bg);
+      border-color: var(--ok);
+    }
+    .order-row.wrong {
+      background: var(--err-bg);
+      border-color: var(--err);
+    }
+    .order-btns {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .order-btns button {
+      padding: 2px 8px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      border: 1px solid #9ca3af;
+      background: #fff;
+      border-radius: 4px;
+    }
+    /* Hotspot */
+    .hotspot-wrapper {
+      position: relative;
+      display: inline-block;
+      max-width: 100%;
+    }
+    .hotspot-pin {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 700;
+      border: 2px solid #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.35);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+    }
+    .hotspot-pin.active {
+      background: var(--primary);
+      transform: translate(-50%, -50%) scale(1.15);
+    }
+    .hotspot-questions {
+      margin-top: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .hotspot-q-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .hotspot-q-row.correct {
+      background: var(--ok-bg);
+      border-color: var(--ok);
+    }
+    .hotspot-q-row.wrong {
+      background: var(--err-bg);
+      border-color: var(--err);
+    }
+    .hotspot-select {
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid #94a3b8;
+      font-size: 0.95rem;
+      min-width: 220px;
+    }
+    /* Crossword */
+    .cw-layout {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      align-items: flex-start;
+    }
+    .cw-grid {
+      display: inline-grid;
+      gap: 2px;
+      background: #1f2937;
+      padding: 4px;
+      border-radius: 6px;
+    }
+    .cw-cell {
+      width: 34px;
+      height: 34px;
+      position: relative;
+      background: #1f2937;
+    }
+    .cw-cell.active-cell {
+      background: #fff;
+    }
+    .cw-num {
+      position: absolute;
+      top: 1px;
+      left: 3px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: #374151;
+      pointer-events: none;
+    }
+    .cw-input {
+      width: 100%;
+      height: 100%;
+      border: none;
+      text-align: center;
+      font-size: 1.05rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      background: transparent;
+      padding: 0;
+    }
+    .cw-input:focus {
+      outline: 2px solid var(--primary);
+      background: #eff6ff;
+    }
+    .cw-input.correct {
+      background: var(--ok-bg);
+      color: var(--ok);
+    }
+    .cw-input.wrong {
+      background: var(--err-bg);
+      color: var(--err);
+    }
+    .cw-clues {
+      flex: 1;
+      min-width: 240px;
+    }
+    .cw-clues h4 {
+      margin: 0 0 8px;
+      color: var(--primary-dark);
+    }
+    .cw-clues ul {
+      margin: 0 0 14px;
+      padding-left: 20px;
+    }
+    /* Buttons & Feedback */
+    .actions {
+      margin-top: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+    .btn {
+      padding: 9px 18px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-check {
+      background: var(--primary);
+      color: #fff;
+    }
+    .btn-check:hover { background: var(--primary-dark); }
+    .btn-check:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+    }
+    .btn-retry {
+      background: #f59e0b;
+      color: #fff;
+      display: none;
+    }
+    .btn-solution {
+      background: #4b5563;
+      color: #fff;
+      display: none;
+    }
+    .feedback-msg {
+      font-weight: 600;
+      font-size: 0.95rem;
+      margin-left: 4px;
+    }
+    .summary-card {
+      background: #f8fafc;
+      border: 2px solid var(--primary);
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
 
-<div class="topbar">
-  <div class="topbar-title" id="pageTitle">Fizika szorgalmi feladatsor</div>
-  <div class="topbar-stats">
-    <span id="studentDisplay">Tanuló: -</span>
-    <span class="badge" id="scoreBadge">0 / 25 pont</span>
+<header>
+  <div class="header-inner">
+    <div class="header-title">
+      <h1 id="page-title">Feladatlap betöltése...</h1>
+      <p id="page-subtitle">Kérlek várj...</p>
+    </div>
+    <div class="status-pill">
+      <span id="student-display">Tanuló: —</span>
+      <span id="progress-display">Ellenőrizve: 0 / 0</span>
+      <span id="score-display">Pont: 0 / 0</span>
+    </div>
+  </div>
+</header>
+
+<div class="container" id="tasks-container"></div>
+
+<div class="container">
+  <div class="card summary-card" id="summary-box" style="display:none;">
+    <h2 style="margin-top:0;">Összesítés</h2>
+    <p id="final-score-text" style="font-size:1.2rem; font-weight:700;"></p>
+    <p id="grade-text" style="font-size:1.1rem; color:var(--primary-dark);"></p>
+    <p id="firebase-status-text" style="font-size:0.95rem; color:var(--muted);"></p>
   </div>
 </div>
 
-<div class="container" id="quizContainer">
-  <div class="card"><p>Feladatsor betöltése...</p></div>
-</div>
-
 <script>
+  // === FIREBASE KONFIGURÁCIÓ ===
   const firebaseConfig = {
     apiKey: "AIzaSyC4ypKsFziwbyOQ87Sb-1PrrIZcvLf1_xQ",
     authDomain: "fizikadomino.firebaseapp.com",
@@ -396,32 +553,45 @@
   firebase.initializeApp(firebaseConfig);
   const adatbazis = firebase.database();
 
+  let FELADAT_ID = "h5p_altalanos";
+  let FELADAT_NEV = "altalanos";
+  let TOTAL_FELADATOK_SZAMA = 0;
   let diakNeve = "";
   let marMentve = false;
   let reszEredmenyek = {};
-  let FELADAT_ADAT = null;
+  let feladatLista = [];
 
+  // URL paraméterből téma betöltése (?tema=...)
   const urlParams = new URLSearchParams(window.location.search);
-  const tema = urlParams.get('tema') || 'fenytan';
+  const temaParam = urlParams.get("tema") || "fenytan";
 
-  const script = document.createElement('script');
-  script.src = tema + '.js';
-  script.onload = function() {
+  const scriptElem = document.createElement("script");
+  scriptElem.src = temaParam + ".js";
+  scriptElem.onload = function() {
     if (window.FELADAT_ADATOK) {
-      FELADAT_ADAT = window.FELADAT_ADATOK;
-      document.getElementById('pageTitle').textContent = FELADAT_ADAT.cim || 'Fizika feladatsor';
-      document.title = FELADAT_ADAT.cim || 'Fizika feladatsor';
-      frissitPontjelzo();
-      renderFeladatok();
-      kerjNevet();
+      inditFeladatlapot(window.FELADAT_ADATOK);
     } else {
-      document.getElementById('quizContainer').innerHTML = '<div class="card"><p>Hiba: A feladatfájl formátuma hibás.</p></div>';
+      document.getElementById("page-title").textContent = "Hiba a feladatfájlban";
     }
   };
-  script.onerror = function() {
-    document.getElementById('quizContainer').innerHTML = '<div class="card"><p>Nem található a kért feladatsor (' + tema + '.js).</p></div>';
+  scriptElem.onerror = function() {
+    document.getElementById("page-title").textContent = "Nem található a feladatfájl: " + temaParam + ".js";
+    document.getElementById("page-subtitle").textContent = "Ellenőrizd a link végén a ?tema=... paramétert!";
   };
-  document.head.appendChild(script);
+  document.head.appendChild(scriptElem);
+
+  function inditFeladatlapot(adat) {
+    FELADAT_ID = adat.feladat_id || ("h5p_" + temaParam);
+    FELADAT_NEV = adat.feladat || temaParam;
+    feladatLista = adat.feladatok || [];
+    TOTAL_FELADATOK_SZAMA = feladatLista.length;
+
+    document.getElementById("page-title").textContent = adat.cim || "Fizika feladatlap";
+    document.getElementById("page-subtitle").textContent = adat.alcim || "";
+    renderFeladatok();
+    frissitFejlecet();
+    kerjNevet();
+  }
 
   function kerjNevet() {
     let beirtNev = prompt("Kérlek, add meg a teljes nevedet a feladat megkezdéséhez:");
@@ -431,21 +601,21 @@
       return;
     }
     diakNeve = beirtNev.trim();
-    document.getElementById('studentDisplay').textContent = "Tanuló: " + diakNeve;
+    document.getElementById("student-display").textContent = "Tanuló: " + diakNeve;
 
-    const fid = FELADAT_ADAT.feladat_id || ("h5p_" + tema);
-    const ellenorzoKulcs = (diakNeve + "_" + fid).toLowerCase();
+    const ellenorzoKulcs = (diakNeve + "_" + FELADAT_ID).toLowerCase();
 
-    adatbazis.ref('Szorgalmi').orderByChild('nev_feladat').equalTo(ellenorzoKulcs).once('value')
+    adatbazis.ref("Szorgalmi").orderByChild("nev_feladat").equalTo(ellenorzoKulcs).once("value")
       .then(snapshot => {
         if (snapshot.exists()) {
           alert("Figyelem! Ezt a konkrét feladatsort ezzel a névvel (" + diakNeve + ") már egyszer beküldted! Gyakorolni szabad, de új pontszámot nem rögzítek a naplóba.");
           marMentve = true;
-          felfedGyakorloGombokat();
+          frissitGombLathatosagot();
+          megjelenitSzabalyzatot();
         } else {
           marMentve = false;
+          megjelenitSzabalyzatot();
         }
-        megjelenitSzabalyzatot();
       })
       .catch(error => {
         console.error("Firebase névellenőrzési hiba:", error);
@@ -454,580 +624,726 @@
   }
 
   function megjelenitSzabalyzatot() {
-    const modalHTML = `
-      <div id="szabalyzat-modal-overlay" style="
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background-color: rgba(0, 0, 0, 0.7); z-index: 99999;
-        display: flex; justify-content: center; align-items: center;
-        font-family: Arial, sans-serif;
-      ">
-        <div style="
-          background-color: #ffffff; border-top: 6px solid #cc0000;
-          width: 90%; max-width: 500px; padding: 25px; border-radius: 8px;
-          box-shadow: 0 10px 25px rgba(0,0,0,0.3); box-sizing: border-box;
-        ">
-          <h3 style="color: #cc0000; margin-top: 0; margin-bottom: 15px; font-size: 20px; text-align: center;">
-            ⚠️ Fontos szabályok a kitöltéshez!
-          </h3>
-          <p style="color: #333; font-size: 15px; line-height: 1.5; margin-bottom: 15px;">
-            Mielőtt hozzáfognál a feladatokhoz, kérlek olvasd el figyelmesen a szabályokat:
-          </p>
-          <ul style="margin: 15px 0; padding-left: 20px; color: #444; font-size: 14px; line-height: 1.6;">
-            <li style="margin-bottom: 8px;">Minden feladat megoldása után rá <strong>KELL</strong> kattintanod az <strong>Ellenőrzés</strong> gombra!</li>
-            <li style="margin-bottom: 8px;">Az Ellenőrzés gomb megnyomása után a válaszod rögzül, azt utólag már <strong>NEM lehet módosítani</strong>!</li>
-            <li style="margin-bottom: 8px;">A pontjaidat a rendszer automatikusan küldi a tanári naplóba, amint az összes feladatot leellenőrizted.</li>
-          </ul>
-          <div style="text-align: center; margin-top: 25px;">
-            <button onclick="document.getElementById('szabalyzat-modal-overlay').remove();" style="
-              background-color: #cc0000; color: white; border: none;
-              padding: 12px 25px; font-size: 15px; font-weight: bold;
-              border-radius: 5px; cursor: pointer;
-            ">Értettem, kezdem a feladatot!</button>
-          </div>
-        </div>
-      </div>
-    `;
-    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    const overlay = document.createElement("div");
+    overlay.id = "szabalyzat-modal-overlay";
+    overlay.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:99999;display:flex;justify-content:center;align-items:center;font-family:Arial,sans-serif;";
+    overlay.innerHTML = [
+      '<div style="background:#fff;border-top:6px solid #cc0000;width:90%;max-width:500px;padding:25px;border-radius:8px;box-shadow:0 10px 25px rgba(0,0,0,0.3);">',
+      '<h3 style="color:#cc0000;margin-top:0;margin-bottom:15px;font-size:20px;text-align:center;">⚠️ Fontos szabályok a kitöltéshez!</h3>',
+      '<p style="color:#333;font-size:15px;line-height:1.5;margin-bottom:15px;">Mielőtt hozzáfognál a feladatokhoz, kérlek olvasd el figyelmesen a szabályokat:</p>',
+      '<ul style="margin:15px 0;padding-left:20px;color:#444;font-size:14px;line-height:1.6;">',
+      '<li style="margin-bottom:8px;">Minden feladat megoldása után rá <strong>KELL</strong> kattintanod az <strong>Ellenőrzés</strong> gombra!</li>',
+      '<li style="margin-bottom:8px;">Az Ellenőrzés gomb megnyomása után a válaszod rögzül, azt utólag már <strong>NEM lehet módosítani</strong>!</li>',
+      '<li style="margin-bottom:8px;">A pontjaidat a rendszer automatikusan küldi a tanári naplóba, amint az összes feladatot leellenőrizted.</li>',
+      '</ul>',
+      '<div style="text-align:center;margin-top:25px;">',
+      '<button id="start-btn" style="background:#cc0000;color:#fff;border:none;padding:12px 25px;font-size:15px;font-weight:bold;border-radius:5px;cursor:pointer;">Értettem, kezdem a feladatot!</button>',
+      '</div></div>'
+    ].join("");
+    document.body.appendChild(overlay);
+    document.getElementById("start-btn").onclick = function() {
+      overlay.remove();
+    };
   }
 
-  function felfedGyakorloGombokat() {
-    document.querySelectorAll('.btn-retry, .btn-sol').forEach(b => b.style.display = 'inline-block');
-  }
-
-  function frissitPontjelzo() {
-    if (!FELADAT_ADAT) return;
-    let osszMax = FELADAT_ADAT.feladatok.reduce((s, f) => s + f.pont, 0);
-    let osszElert = Object.values(reszEredmenyek).reduce((s, r) => s + r.elert, 0);
-    document.getElementById('scoreBadge').textContent = osszElert + " / " + osszMax + " pont";
-  }
-
-  function rogzitReszeredmeny(idx, elert, max) {
-    if (!(idx in reszEredmenyek)) {
-      reszEredmenyek[idx] = { elert: elert, max: max };
-    }
-    frissitPontjelzo();
-
-    const osszesSzam = FELADAT_ADAT.feladatok.length;
-    if (!marMentve && Object.keys(reszEredmenyek).length >= osszesSzam) {
-      let vegsoElertPont = 0;
-      let vegsoMaxPont = 0;
-      for (let k in reszEredmenyek) {
-        vegsoElertPont += reszEredmenyek[k].elert;
-        vegsoMaxPont += reszEredmenyek[k].max;
-      }
-      marMentve = true;
-      felfedGyakorloGombokat();
-
-      const fid = FELADAT_ADAT.feladat_id || ("h5p_" + tema);
-      const fnev = FELADAT_ADAT.feladat || tema;
-      const vegsoEredmeny = {
-        name: diakNeve,
-        feladat_id: fid,
-        nev_feladat: (diakNeve + "_" + fid).toLowerCase(),
-        score: vegsoElertPont,
-        max_score: vegsoMaxPont,
-        feladat: fnev,
-        idobelyeg: new Date().toLocaleString("hu-HU")
-      };
-
-      adatbazis.ref('Szorgalmi').push(vegsoEredmeny)
-        .then(() => {
-          alert("Köszönöm! A teljes feladatsort befejezted. A végső elért pontszámodat (" + vegsoElertPont + " / " + vegsoMaxPont + ") sikeresen rögzítettem a naplóba.
-
-Mostantól átnézheted a hibáidat a feladatok alatt!");
-        })
-        .catch(err => {
-          console.error("Firebase küldési hiba:", err);
-          marMentve = false;
-        });
-    } else if (marMentve) {
-      felfedGyakorloGombokat();
-    }
-  }
-
-  function norm(s) {
-    return String(s || "").trim().toLowerCase().replace(/\s+/g, " ");
-  }
-
-  function renderFeladatok() {
-    const cont = document.getElementById('quizContainer');
-    cont.innerHTML = '';
-
-    FELADAT_ADAT.feladatok.forEach((f, idx) => {
-      const card = document.createElement('div');
-      card.className = 'card';
-      card.id = 'task_' + idx;
-
-      let html = `
-        <div class="card-header">
-          <h3 class="card-title">${idx + 1}. feladat: ${f.cim}</h3>
-          <span class="pts-tag">${f.pont} pont</span>
-        </div>
-        <p>${f.utasitas}</p>
-      `;
-
-      if (f.szituacio) {
-        html += `<div class="situation">${f.szituacio}</div>`;
-      }
-      if (f.svg && f.tipus !== 'hotspot') {
-        html += `<div class="svg-box">${f.svg}</div>`;
-      }
-
-      html += `<div id="body_${idx}"></div>`;
-      html += `
-        <div class="btn-row">
-          <button class="btn btn-check" id="chk_${idx}" onclick="ellenoriz(${idx})">Ellenőrzés</button>
-          <button class="btn btn-retry" id="ret_${idx}" onclick="ujra(${idx})">Újra</button>
-          <button class="btn btn-sol" id="sol_${idx}" onclick="megoldas(${idx})">Megoldás mutatása</button>
-        </div>
-        <div class="feedback" id="fb_${idx}"></div>
-      `;
-
-      card.innerHTML = html;
-      cont.appendChild(card);
-      epitsFeladatTest(f, idx);
+  function frissitGombLathatosagot() {
+    document.querySelectorAll(".btn-retry, .btn-solution").forEach(btn => {
+      btn.style.display = marMentve ? "inline-block" : "none";
     });
   }
 
-  let selectedChip = null;
-  let selectedGroupItem = null;
+  function frissitFejlecet() {
+    let osszMax = feladatLista.reduce((acc, f) => acc + (f.pont || 0), 0);
+    let osszElert = 0;
+    for (let k in reszEredmenyek) {
+      osszElert += reszEredmenyek[k].elert;
+    }
+    let keszDb = Object.keys(reszEredmenyek).length;
+    document.getElementById("progress-display").textContent = "Ellenőrizve: " + keszDb + " / " + TOTAL_FELADATOK_SZAMA;
+    document.getElementById("score-display").textContent = "Pont: " + osszElert + " / " + osszMax;
+  }
 
-  function epitsFeladatTest(f, idx) {
-    const body = document.getElementById('body_' + idx);
-    body.innerHTML = '';
+  function rogzoitFeladatEredmenyt(idx, elert, maxPont) {
+    if (!(idx in reszEredmenyek)) {
+      reszEredmenyek[idx] = { elert: elert, max: maxPont };
+    }
+    frissitFejlecet();
 
-    if (f.tipus === 'drag_words') {
-      const bank = document.createElement('div');
-      bank.className = 'word-bank';
-      const szavak = [...f.szobank].sort(() => Math.random() - 0.5);
-      szavak.forEach((szo, si) => {
-        const chip = document.createElement('span');
-        chip.className = 'chip';
-        chip.textContent = szo;
-        chip.dataset.word = szo;
-        chip.id = `chip_${idx}_${si}`;
-        chip.onclick = () => {
-          if (chip.classList.contains('used')) return;
-          document.querySelectorAll(`#task_${idx} .chip`).forEach(c => c.classList.remove('selected'));
-          selectedChip = chip;
-          chip.classList.add('selected');
+    let leellenorzott = Object.keys(reszEredmenyek).length;
+    if (leellenorzott >= TOTAL_FELADATOK_SZAMA) {
+      let vegsoElert = 0;
+      let vegsoMax = 0;
+      for (let id in reszEredmenyek) {
+        vegsoElert += reszEredmenyek[id].elert;
+        vegsoMax += reszEredmenyek[id].max;
+      }
+
+      const summary = document.getElementById("summary-box");
+      summary.style.display = "block";
+      document.getElementById("final-score-text").textContent = "Végső eredmény: " + vegsoElert + " / " + vegsoMax + " pont";
+      const szazalek = vegsoMax > 0 ? Math.round((vegsoElert / vegsoMax) * 100) : 0;
+      let jegy = 1;
+      if (szazalek >= 90) jegy = 5;
+      else if (szazalek >= 75) jegy = 4;
+      else if (szazalek >= 60) jegy = 3;
+      else if (szazalek >= 40) jegy = 2;
+      document.getElementById("grade-text").textContent = "Teljesítmény: " + szazalek + "% (Javasolt érdemjegy: " + jegy + ")";
+
+      if (!marMentve) {
+        marMentve = true;
+        frissitGombLathatosagot();
+        const ellenorzoKulcs = (diakNeve + "_" + FELADAT_ID).toLowerCase();
+        const vegsoEredmeny = {
+          name: diakNeve,
+          feladat_id: FELADAT_ID,
+          nev_feladat: ellenorzoKulcs,
+          score: vegsoElert,
+          max_score: vegsoMax,
+          feladat: FELADAT_NEV,
+          idobelyeg: new Date().toLocaleString("hu-HU")
         };
-        bank.appendChild(chip);
-      });
-      body.appendChild(bank);
 
-      const p = document.createElement('p');
-      let slotIdx = 0;
-      p.innerHTML = f.szoveg.replace(/___/g, () => {
-        const h = `<span class="drop-slot" data-slot="${slotIdx}" onclick="slotKatt(${idx}, ${slotIdx})"></span>`;
-        slotIdx++;
-        return h;
-      });
-      body.appendChild(p);
-    }
+        adatbazis.ref("Szorgalmi").push(vegsoEredmeny)
+          .then(() => {
+            document.getElementById("firebase-status-text").textContent = "✔ Eredmény sikeresen rögzítve a tanári naplóba.";
+            alert("Köszönöm! A teljes feladatsort befejezted. A végső elért pontszámodat (" + vegsoElert + " / " + vegsoMax + ") sikeresen rögzítettem a naplóba.
 
-    else if (f.tipus === 'blanks') {
-      const p = document.createElement('div');
-      let bIdx = 0;
-      p.innerHTML = f.szoveg.replace(/___/g, () => {
-        const h = `<input type="text" class="blank-inp" data-blank="${bIdx}" autocomplete="off">`;
-        bIdx++;
-        return h;
-      });
-      body.appendChild(p);
-    }
-
-    else if (f.tipus === 'group') {
-      const pool = document.createElement('div');
-      pool.className = 'group-pool';
-      pool.id = `pool_${idx}`;
-      const elemek = f.elemek.map((e, i) => ({ ...e, origIdx: i })).sort(() => Math.random() - 0.5);
-      elemek.forEach(el => {
-        const div = document.createElement('div');
-        div.className = 'group-item';
-        div.textContent = el.szoveg;
-        div.dataset.target = el.csoport;
-        div.onclick = (ev) => {
-          ev.stopPropagation();
-          document.querySelectorAll(`#task_${idx} .group-item`).forEach(x => x.classList.remove('selected'));
-          selectedGroupItem = div;
-          div.classList.add('selected');
-        };
-        pool.appendChild(div);
-      });
-      pool.onclick = () => {
-        if (selectedGroupItem && selectedGroupItem.closest(`#task_${idx}`)) {
-          pool.appendChild(selectedGroupItem);
-          selectedGroupItem.classList.remove('selected');
-          selectedGroupItem = null;
-        }
-      };
-      body.appendChild(pool);
-
-      const cols = document.createElement('div');
-      cols.className = 'group-cols';
-      f.csoportok.forEach(cs => {
-        const box = document.createElement('div');
-        box.className = 'group-box';
-        box.dataset.group = cs;
-        box.innerHTML = `<h4>${cs}</h4>`;
-        box.onclick = () => {
-          if (selectedGroupItem && selectedGroupItem.closest(`#task_${idx}`)) {
-            box.appendChild(selectedGroupItem);
-            selectedGroupItem.classList.remove('selected');
-            selectedGroupItem = null;
-          }
-        };
-        cols.appendChild(box);
-      });
-      body.appendChild(cols);
-    }
-
-    else if (f.tipus === 'multi') {
-      f.opciok.forEach((op, oi) => {
-        const lbl = document.createElement('label');
-        lbl.className = 'multi-opt';
-        lbl.innerHTML = `<input type="checkbox" data-opt="${oi}"> <span>${op.szoveg}</span>`;
-        body.appendChild(lbl);
-      });
-    }
-
-    else if (f.tipus === 'order') {
-      const ul = document.createElement('ul');
-      ul.className = 'order-list';
-      const kevert = f.elemek.map((sz, i) => ({ szoveg: sz, helyesIdx: i })).sort(() => Math.random() - 0.5);
-      kevert.forEach(item => {
-        const li = document.createElement('li');
-        li.className = 'order-item';
-        li.dataset.correctIdx = item.helyesIdx;
-        li.innerHTML = `
-          <span>${item.szoveg}</span>
-          <div class="order-btns">
-            <button type="button" onclick="mozgat(this, -1)">▲</button>
-            <button type="button" onclick="mozgat(this, 1)">▼</button>
-          </div>
-        `;
-        ul.appendChild(li);
-      });
-      body.appendChild(ul);
-    }
-
-    else if (f.tipus === 'hotspot') {
-      const wrap = document.createElement('div');
-      wrap.className = 'svg-box';
-      const inner = document.createElement('div');
-      inner.className = 'hotspot-wrap';
-      inner.innerHTML = f.svg;
-
-      const panel = document.createElement('div');
-      panel.className = 'hs-panel';
-      panel.id = `hs_panel_${idx}`;
-      panel.innerHTML = `<em>Kattints az ábrán található sorszámozott piros pontokra a megnevezésük kiválasztásához!</em>`;
-
-      f.pontok.forEach((pt, pi) => {
-        const pin = document.createElement('button');
-        pin.type = 'button';
-        pin.className = 'hs-pin';
-        pin.style.left = pt.x + '%';
-        pin.style.top = pt.y + '%';
-        pin.textContent = pi + 1;
-        pin.dataset.hsIdx = pi;
-        pin.dataset.chosen = "";
-        pin.onclick = () => {
-          const valaszok = [...f.valaszLista].sort();
-          let opts = `<option value="">-- Válassz fogalmat --</option>`;
-          valaszok.forEach(v => {
-            const sel = (pin.dataset.chosen === v) ? 'selected' : '';
-            opts += `<option value="${v}" ${sel}>${v}</option>`;
+Mostantól átnézheted a hibáidat a feladatok alatt!");
+          })
+          .catch(err => {
+            console.error("Firebase küldési hiba:", err);
+            document.getElementById("firebase-status-text").textContent = "⚠ Hiba történt a naplóba mentéskor.";
+            marMentve = false;
           });
-          panel.innerHTML = `
-            <strong>${pi + 1}. pont – ${pt.kerdes || 'Mit jelöl ez a pont az ábrán?'}</strong><br><br>
-            <select class="hs-select" onchange="hsValaszt(${idx}, ${pi}, this.value)">${opts}</select>
-          `;
-        };
-        inner.appendChild(pin);
-      });
-
-      wrap.appendChild(inner);
-      body.appendChild(wrap);
-      body.appendChild(panel);
-    }
-
-    else if (f.tipus === 'crossword') {
-      const layout = document.createElement('div');
-      layout.className = 'cw-layout';
-
-      const table = document.createElement('table');
-      table.className = 'cw-grid';
-
-      const gridMap = Array.from({ length: f.sorok }, () => Array(f.oszlopok).fill(null));
-      f.szavak.forEach(w => {
-        const betuk = w.szo.toUpperCase().split('');
-        betuk.forEach((ch, k) => {
-          const r = w.irany === 'V' ? w.sor + k : w.sor;
-          const c = w.irany === 'H' ? w.oszlop + k : w.oszlop;
-          if (!gridMap[r][c]) gridMap[r][c] = { char: ch, num: null };
-          if (k === 0) gridMap[r][c].num = w.szam;
-        });
-      });
-
-      for (let r = 0; r < f.sorok; r++) {
-        const tr = document.createElement('tr');
-        for (let c = 0; c < f.oszlopok; c++) {
-          const td = document.createElement('td');
-          td.className = 'cw-cell';
-          const cellData = gridMap[r][c];
-          if (cellData) {
-            td.classList.add('active');
-            td.dataset.char = cellData.char;
-            if (cellData.num) {
-              td.innerHTML += `<span class="cw-num">${cellData.num}</span>`;
-            }
-            const inp = document.createElement('input');
-            inp.type = 'text';
-            inp.maxLength = 1;
-            inp.className = 'cw-inp';
-            td.appendChild(inp);
-          }
-          tr.appendChild(td);
-        }
-        table.appendChild(tr);
+      } else {
+        frissitGombLathatosagot();
+        document.getElementById("firebase-status-text").textContent = "Gyakorló mód: korábban már rögzített név, új pont nem került mentésre.";
       }
-
-      const clues = document.createElement('div');
-      clues.className = 'cw-clues';
-      const vizszintes = f.szavak.filter(w => w.irany === 'H');
-      const fuggoleges = f.szavak.filter(w => w.irany === 'V');
-
-      let clueHtml = '';
-      if (vizszintes.length) {
-        clueHtml += `<h4>Vízszintes:</h4><ul>` + vizszintes.map(w => `<li><strong>${w.szam}.</strong> ${w.meghatarozas}</li>`).join('') + `</ul>`;
-      }
-      if (fuggoleges.length) {
-        clueHtml += `<h4>Függőleges:</h4><ul>` + fuggoleges.map(w => `<li><strong>${w.szam}.</strong> ${w.meghatarozas}</li>`).join('') + `</ul>`;
-      }
-      clues.innerHTML = clueHtml;
-
-      layout.appendChild(table);
-      layout.appendChild(clues);
-      body.appendChild(layout);
     }
   }
 
-  window.slotKatt = function(idx, slotIdx) {
-    const chk = document.getElementById('chk_' + idx);
-    if (chk.disabled) return;
-    const slot = document.querySelector(`#task_${idx} .drop-slot[data-slot="${slotIdx}"]`);
-    if (slot.dataset.chipId) {
-      const oldChip = document.getElementById(slot.dataset.chipId);
-      if (oldChip) oldChip.classList.remove('used');
-      slot.textContent = '';
-      delete slot.dataset.chipId;
-    }
-    if (selectedChip && selectedChip.closest(`#task_${idx}`)) {
-      slot.textContent = selectedChip.dataset.word;
-      slot.dataset.chipId = selectedChip.id;
-      selectedChip.classList.add('used');
-      selectedChip.classList.remove('selected');
-      selectedChip = null;
-    }
-  };
+  function renderFeladatok() {
+    const container = document.getElementById("tasks-container");
+    container.innerHTML = "";
 
-  window.mozgat = function(btn, dir) {
-    const li = btn.closest('.order-item');
-    const ul = li.parentElement;
-    if (dir === -1 && li.previousElementSibling) {
-      ul.insertBefore(li, li.previousElementSibling);
-    } else if (dir === 1 && li.nextElementSibling) {
-      ul.insertBefore(li.nextElementSibling, li);
-    }
-  };
+    feladatLista.forEach((f, idx) => {
+      const card = document.createElement("div");
+      card.className = "card";
+      card.id = "task-card-" + idx;
 
-  window.hsValaszt = function(idx, pi, val) {
-    const pin = document.querySelector(`#task_${idx} .hs-pin[data-hs-idx="${pi}"]`);
-    pin.dataset.chosen = val;
-    if (val) pin.classList.add('answered');
-    else pin.classList.remove('answered');
-  };
+      let html = '<div class="task-header">' +
+        '<h3 class="task-title">' + (idx + 1) + '. feladat: ' + f.cim + '</h3>' +
+        '<span class="task-points">' + f.pont + ' pont</span>' +
+        '</div>';
 
-  window.ellenoriz = function(idx) {
-    const f = FELADAT_ADAT.feladatok[idx];
-    const chk = document.getElementById('chk_' + idx);
-    chk.disabled = true;
+      if (f.utasitas) {
+        html += '<p class="task-desc">' + f.utasitas + '</p>';
+      }
+      if (f.szituacio) {
+        html += '<div class="situation-box">' + f.szituacio + '</div>';
+      }
+      if (f.svg && f.tipus !== "hotspot") {
+        html += '<div class="svg-box">' + f.svg + '</div>';
+      }
 
-    let elert = 0;
+      html += '<div id="task-body-' + idx + '"></div>';
+      html += '<div class="actions">' +
+        '<button class="btn btn-check" id="check-btn-' + idx + '">Ellenőrzés</button>' +
+        '<button class="btn btn-retry" id="retry-btn-' + idx + '">Újra</button>' +
+        '<button class="btn btn-solution" id="sol-btn-' + idx + '">Megoldás mutatása</button>' +
+        '<span class="feedback-msg" id="fb-' + idx + '"></span>' +
+        '</div>';
 
-    if (f.tipus === 'drag_words') {
-      const slots = document.querySelectorAll(`#task_${idx} .drop-slot`);
-      let jo = 0;
-      slots.forEach((sl, i) => {
-        if (norm(sl.textContent) === norm(f.megoldasok[i])) {
-          sl.classList.add('correct');
-          jo++;
-        } else {
-          sl.classList.add('wrong');
-        }
-      });
-      elert = Math.round((jo / f.megoldasok.length) * f.pont);
-    }
+      card.innerHTML = html;
+      container.appendChild(card);
 
-    else if (f.tipus === 'blanks') {
-      const inps = document.querySelectorAll(`#task_${idx} .blank-inp`);
-      let jo = 0;
-      inps.forEach((inp, i) => {
-        inp.disabled = true;
-        const elfogadott = Array.isArray(f.megoldasok[i]) ? f.megoldasok[i] : [f.megoldasok[i]];
-        if (elfogadott.some(m => norm(m) === norm(inp.value))) {
-          inp.classList.add('correct');
-          jo++;
-        } else {
-          inp.classList.add('wrong');
-        }
-      });
-      elert = Math.round((jo / f.megoldasok.length) * f.pont);
-    }
+      const bodyEl = document.getElementById("task-body-" + idx);
+      if (f.tipus === "drag_words") initDragWords(f, idx, bodyEl);
+      else if (f.tipus === "blanks") initBlanks(f, idx, bodyEl);
+      else if (f.tipus === "group") initGroup(f, idx, bodyEl);
+      else if (f.tipus === "multi") initMulti(f, idx, bodyEl);
+      else if (f.tipus === "order") initOrder(f, idx, bodyEl);
+      else if (f.tipus === "hotspot") initHotspot(f, idx, bodyEl);
+      else if (f.tipus === "crossword") initCrossword(f, idx, bodyEl);
+    });
+  }
 
-    else if (f.tipus === 'group') {
-      const items = document.querySelectorAll(`#task_${idx} .group-item`);
-      let jo = 0;
-      items.forEach(it => {
-        const box = it.closest('.group-box');
-        if (box && box.dataset.group === it.dataset.target) {
-          it.classList.add('correct');
-          jo++;
-        } else {
-          it.classList.add('wrong');
-        }
-      });
-      elert = Math.round((jo / f.elemek.length) * f.pont);
-    }
+  // 1. DRAG WORDS
+  function initDragWords(f, idx, bodyEl) {
+    let selectedWord = null;
+    const allWords = [...f.helyes_szavak, ...(f.zavaro_szavak || [])].sort(() => Math.random() - 0.5);
 
-    else if (f.tipus === 'multi') {
-      const boxes = document.querySelectorAll(`#task_${idx} input[type="checkbox"]`);
-      let nyers = 0;
-      const maxHelyes = f.opciok.filter(o => o.helyes).length;
-      boxes.forEach((cb, i) => {
-        cb.disabled = true;
-        const lbl = cb.closest('.multi-opt');
-        if (cb.checked) {
-          if (f.opciok[i].helyes) {
-            lbl.classList.add('correct');
-            nyers++;
-          } else {
-            lbl.classList.add('wrong');
-            nyers--;
+    const bank = document.createElement("div");
+    bank.className = "word-bank";
+    allWords.forEach((w, wIdx) => {
+      const chip = document.createElement("span");
+      chip.className = "word-chip";
+      chip.textContent = w;
+      chip.dataset.widx = wIdx;
+      chip.onclick = () => {
+        if (chip.classList.contains("used")) return;
+        bank.querySelectorAll(".word-chip").forEach(c => c.classList.remove("selected"));
+        chip.classList.add("selected");
+        selectedWord = chip;
+      };
+      bank.appendChild(chip);
+    });
+    bodyEl.appendChild(bank);
+
+    const textDiv = document.createElement("div");
+    let parts = f.szoveg.split("___");
+    parts.forEach((part, pIdx) => {
+      textDiv.appendChild(document.createTextNode(part));
+      if (pIdx < parts.length - 1) {
+        const slot = document.createElement("span");
+        slot.className = "drop-slot";
+        slot.textContent = "...";
+        slot.dataset.slotIdx = pIdx;
+        slot.onclick = () => {
+          if (document.getElementById("check-btn-" + idx).disabled) return;
+          if (slot.dataset.usedChip) {
+            const prev = bank.querySelector('[data-widx="' + slot.dataset.usedChip + '"]');
+            if (prev) prev.classList.remove("used");
+            slot.textContent = "...";
+            delete slot.dataset.usedChip;
           }
-        }
-      });
-      nyers = Math.max(0, nyers);
-      elert = Math.round((nyers / maxHelyes) * f.pont);
-    }
+          if (selectedWord) {
+            slot.textContent = selectedWord.textContent;
+            slot.dataset.usedChip = selectedWord.dataset.widx;
+            selectedWord.classList.remove("selected");
+            selectedWord.classList.add("used");
+            selectedWord = null;
+          }
+        };
+        textDiv.appendChild(slot);
+      }
+    });
+    bodyEl.appendChild(textDiv);
 
-    else if (f.tipus === 'order') {
-      const lis = document.querySelectorAll(`#task_${idx} .order-item`);
-      let jo = 0;
-      lis.forEach((li, i) => {
-        li.querySelectorAll('button').forEach(b => b.disabled = true);
-        if (Number(li.dataset.correctIdx) === i) {
-          li.classList.add('correct');
-          jo++;
+    document.getElementById("check-btn-" + idx).onclick = () => {
+      const slots = textDiv.querySelectorAll(".drop-slot");
+      let score = 0;
+      slots.forEach((s, i) => {
+        const ans = s.textContent.trim();
+        const right = f.helyes_szavak[i];
+        if (ans === right) {
+          s.classList.add("correct");
+          score++;
         } else {
-          li.classList.add('wrong');
+          s.classList.add("wrong");
         }
       });
-      elert = Math.round((jo / f.elemek.length) * f.pont);
+      document.getElementById("check-btn-" + idx).disabled = true;
+      document.getElementById("fb-" + idx).textContent = "Elért pont: " + score + " / " + f.pont;
+      rogzoitFeladatEredmenyt(idx, score, f.pont);
+    };
+
+    document.getElementById("retry-btn-" + idx).onclick = () => {
+      textDiv.querySelectorAll(".drop-slot").forEach(s => {
+        s.textContent = "...";
+        s.classList.remove("correct", "wrong");
+        delete s.dataset.usedChip;
+      });
+      bank.querySelectorAll(".word-chip").forEach(c => c.classList.remove("used", "selected"));
+      document.getElementById("check-btn-" + idx).disabled = false;
+      document.getElementById("fb-" + idx).textContent = "";
+    };
+
+    document.getElementById("sol-btn-" + idx).onclick = () => {
+      textDiv.querySelectorAll(".drop-slot").forEach((s, i) => {
+        s.textContent = f.helyes_szavak[i];
+        s.classList.remove("wrong");
+        s.classList.add("correct");
+      });
+    };
+  }
+
+  // 2. BLANKS
+  function initBlanks(f, idx, bodyEl) {
+    const inputs = [];
+    if (f.szoveg) {
+      const p = document.createElement("div");
+      const parts = f.szoveg.split("___");
+      parts.forEach((part, pIdx) => {
+        p.appendChild(document.createTextNode(part));
+        if (pIdx < parts.length - 1) {
+          const inp = document.createElement("input");
+          inp.type = "text";
+          inp.className = "blank-input";
+          inp.placeholder = "válasz...";
+          inputs.push(inp);
+          p.appendChild(inp);
+        }
+      });
+      bodyEl.appendChild(p);
+    } else if (f.elemek) {
+      f.elemek.forEach(item => {
+        const row = document.createElement("div");
+        row.className = "blank-list-item";
+        row.innerHTML = "<span>" + item.kerdes + " </span>";
+        const inp = document.createElement("input");
+        inp.type = "text";
+        inp.className = "blank-input";
+        inp.placeholder = "fogalom...";
+        inputs.push(inp);
+        row.appendChild(inp);
+        bodyEl.appendChild(row);
+      });
     }
 
-    else if (f.tipus === 'hotspot') {
-      const pins = document.querySelectorAll(`#task_${idx} .hs-pin`);
-      let jo = 0;
-      pins.forEach((pin, i) => {
-        if (norm(pin.dataset.chosen) === norm(f.pontok[i].helyes)) {
-          pin.classList.add('correct');
-          jo++;
+    const megoldasLista = f.megoldasok || (f.elemek ? f.elemek.map(e => e.valasz) : []);
+
+    document.getElementById("check-btn-" + idx).onclick = () => {
+      let score = 0;
+      inputs.forEach((inp, i) => {
+        const val = inp.value.trim().toLowerCase();
+        const accepted = Array.isArray(megoldasLista[i])
+          ? megoldasLista[i].map(x => x.toLowerCase())
+          : [String(megoldasLista[i]).toLowerCase()];
+        if (accepted.includes(val)) {
+          inp.classList.add("correct");
+          score++;
         } else {
-          pin.classList.add('wrong');
+          inp.classList.add("wrong");
         }
-      });
-      elert = Math.round((jo / f.pontok.length) * f.pont);
-    }
-
-    else if (f.tipus === 'crossword') {
-      const cells = document.querySelectorAll(`#task_${idx} .cw-cell.active`);
-      let jo = 0;
-      cells.forEach(cell => {
-        const inp = cell.querySelector('.cw-inp');
         inp.disabled = true;
-        if (norm(inp.value) === norm(cell.dataset.char)) {
-          cell.classList.add('correct');
-          jo++;
-        } else {
-          cell.classList.add('wrong');
+      });
+      document.getElementById("check-btn-" + idx).disabled = true;
+      document.getElementById("fb-" + idx).textContent = "Elért pont: " + score + " / " + f.pont;
+      rogzoitFeladatEredmenyt(idx, score, f.pont);
+    };
+
+    document.getElementById("retry-btn-" + idx).onclick = () => {
+      inputs.forEach(inp => {
+        inp.value = "";
+        inp.disabled = false;
+        inp.classList.remove("correct", "wrong");
+      });
+      document.getElementById("check-btn-" + idx).disabled = false;
+      document.getElementById("fb-" + idx).textContent = "";
+    };
+
+    document.getElementById("sol-btn-" + idx).onclick = () => {
+      inputs.forEach((inp, i) => {
+        const firstSol = Array.isArray(megoldasLista[i]) ? megoldasLista[i][0] : megoldasLista[i];
+        inp.value = firstSol;
+        inp.classList.remove("wrong");
+        inp.classList.add("correct");
+      });
+    };
+  }
+
+  // 3. GROUP
+  function initGroup(f, idx, bodyEl) {
+    let selectedCard = null;
+    const pool = document.createElement("div");
+    pool.className = "group-pool";
+
+    const shuffled = f.elemek.map((e, i) => ({ ...e, origIdx: i })).sort(() => Math.random() - 0.5);
+    shuffled.forEach(item => {
+      const el = document.createElement("div");
+      el.className = "group-item";
+      el.textContent = item.szoveg;
+      el.dataset.target = item.kategoria;
+      el.onclick = (ev) => {
+        ev.stopPropagation();
+        if (document.getElementById("check-btn-" + idx).disabled) return;
+        bodyEl.querySelectorAll(".group-item").forEach(x => x.classList.remove("selected"));
+        el.classList.add("selected");
+        selectedCard = el;
+      };
+      pool.appendChild(el);
+    });
+    pool.onclick = () => {
+      if (selectedCard && !document.getElementById("check-btn-" + idx).disabled) {
+        pool.appendChild(selectedCard);
+        selectedCard.classList.remove("selected");
+        selectedCard = null;
+      }
+    };
+    bodyEl.appendChild(pool);
+
+    const bucketsDiv = document.createElement("div");
+    bucketsDiv.className = "group-buckets";
+    f.kategoriak.forEach((kat, kIdx) => {
+      const b = document.createElement("div");
+      b.className = "bucket";
+      b.innerHTML = "<h4>" + kat + "</h4><div class='bucket-items'></div>";
+      b.onclick = () => {
+        if (selectedCard && !document.getElementById("check-btn-" + idx).disabled) {
+          b.querySelector(".bucket-items").appendChild(selectedCard);
+          selectedCard.classList.remove("selected");
+          selectedCard = null;
+        }
+      };
+      bucketsDiv.appendChild(b);
+    });
+    bodyEl.appendChild(bucketsDiv);
+
+    document.getElementById("check-btn-" + idx).onclick = () => {
+      let correctCount = 0;
+      const buckets = bucketsDiv.querySelectorAll(".bucket");
+      buckets.forEach((b, bIdx) => {
+        b.querySelectorAll(".group-item").forEach(item => {
+          if (Number(item.dataset.target) === bIdx) {
+            item.classList.add("correct");
+            correctCount++;
+          } else {
+            item.classList.add("wrong");
+          }
+        });
+      });
+      pool.querySelectorAll(".group-item").forEach(item => item.classList.add("wrong"));
+      const score = Math.round((correctCount / f.elemek.length) * f.pont);
+      document.getElementById("check-btn-" + idx).disabled = true;
+      document.getElementById("fb-" + idx).textContent = "Helyes besorolás: " + correctCount + "/" + f.elemek.length + " (" + score + " / " + f.pont + " pont)";
+      rogzoitFeladatEredmenyt(idx, score, f.pont);
+    };
+
+    document.getElementById("retry-btn-" + idx).onclick = () => {
+      bodyEl.querySelectorAll(".group-item").forEach(item => {
+        item.classList.remove("correct", "wrong", "selected");
+        pool.appendChild(item);
+      });
+      document.getElementById("check-btn-" + idx).disabled = false;
+      document.getElementById("fb-" + idx).textContent = "";
+    };
+
+    document.getElementById("sol-btn-" + idx).onclick = () => {
+      const buckets = bucketsDiv.querySelectorAll(".bucket-items");
+      bodyEl.querySelectorAll(".group-item").forEach(item => {
+        const t = Number(item.dataset.target);
+        item.classList.remove("wrong");
+        item.classList.add("correct");
+        buckets[t].appendChild(item);
+      });
+    };
+  }
+
+  // 4. MULTI
+  function initMulti(f, idx, bodyEl) {
+    const rows = [];
+    f.opciok.forEach((opt, oIdx) => {
+      const label = document.createElement("label");
+      label.className = "multi-option";
+      const cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.dataset.ok = opt.helyes ? "1" : "0";
+      label.appendChild(cb);
+      const span = document.createElement("span");
+      span.textContent = opt.szoveg;
+      label.appendChild(span);
+      bodyEl.appendChild(label);
+      rows.push({ label, cb, ok: opt.helyes });
+    });
+
+    document.getElementById("check-btn-" + idx).onclick = () => {
+      let raw = 0;
+      rows.forEach(r => {
+        r.cb.disabled = true;
+        if (r.cb.checked && r.ok) {
+          r.label.classList.add("correct");
+          raw++;
+        } else if (r.cb.checked && !r.ok) {
+          r.label.classList.add("wrong");
+          raw--;
         }
       });
-      elert = Math.round((jo / cells.length) * f.pont);
+      const score = Math.max(0, Math.min(f.pont, raw));
+      document.getElementById("check-btn-" + idx).disabled = true;
+      document.getElementById("fb-" + idx).textContent = "Elért pont: " + score + " / " + f.pont;
+      rogzoitFeladatEredmenyt(idx, score, f.pont);
+    };
+
+    document.getElementById("retry-btn-" + idx).onclick = () => {
+      rows.forEach(r => {
+        r.cb.checked = false;
+        r.cb.disabled = false;
+        r.label.classList.remove("correct", "wrong");
+      });
+      document.getElementById("check-btn-" + idx).disabled = false;
+      document.getElementById("fb-" + idx).textContent = "";
+    };
+
+    document.getElementById("sol-btn-" + idx).onclick = () => {
+      rows.forEach(r => {
+        r.cb.checked = !!r.ok;
+        r.label.classList.remove("wrong");
+        if (r.ok) r.label.classList.add("correct");
+      });
+    };
+  }
+
+  // 5. ORDER
+  function initOrder(f, idx, bodyEl) {
+    const listDiv = document.createElement("div");
+    listDiv.className = "order-list";
+    const items = f.lepesek.map((szoveg, i) => ({ szoveg, helyesIndex: i })).sort(() => Math.random() - 0.5);
+
+    function renderRows() {
+      listDiv.innerHTML = "";
+      items.forEach((it, pos) => {
+        const row = document.createElement("div");
+        row.className = "order-row";
+        row.dataset.helyes = it.helyesIndex;
+
+        const btns = document.createElement("div");
+        btns.className = "order-btns";
+        const up = document.createElement("button");
+        up.textContent = "▲";
+        up.onclick = () => {
+          if (document.getElementById("check-btn-" + idx).disabled || pos === 0) return;
+          [items[pos - 1], items[pos]] = [items[pos], items[pos - 1]];
+          renderRows();
+        };
+        const down = document.createElement("button");
+        down.textContent = "▼";
+        down.onclick = () => {
+          if (document.getElementById("check-btn-" + idx).disabled || pos === items.length - 1) return;
+          [items[pos + 1], items[pos]] = [items[pos], items[pos + 1]];
+          renderRows();
+        };
+        btns.appendChild(up);
+        btns.appendChild(down);
+
+        const txt = document.createElement("span");
+        txt.textContent = (pos + 1) + ". " + it.szoveg;
+
+        row.appendChild(btns);
+        row.appendChild(txt);
+        listDiv.appendChild(row);
+      });
+    }
+    renderRows();
+    bodyEl.appendChild(listDiv);
+
+    document.getElementById("check-btn-" + idx).onclick = () => {
+      const rows = listDiv.querySelectorAll(".order-row");
+      let okDb = 0;
+      rows.forEach((r, pos) => {
+        if (Number(r.dataset.helyes) === pos) {
+          r.classList.add("correct");
+          okDb++;
+        } else {
+          r.classList.add("wrong");
+        }
+      });
+      const score = Math.round((okDb / items.length) * f.pont);
+      document.getElementById("check-btn-" + idx).disabled = true;
+      document.getElementById("fb-" + idx).textContent = "Helyes pozíció: " + okDb + "/" + items.length + " (" + score + " / " + f.pont + " pont)";
+      rogzoitFeladatEredmenyt(idx, score, f.pont);
+    };
+
+    document.getElementById("retry-btn-" + idx).onclick = () => {
+      items.sort(() => Math.random() - 0.5);
+      renderRows();
+      document.getElementById("check-btn-" + idx).disabled = false;
+      document.getElementById("fb-" + idx).textContent = "";
+    };
+
+    document.getElementById("sol-btn-" + idx).onclick = () => {
+      items.sort((a, b) => a.helyesIndex - b.helyesIndex);
+      renderRows();
+      listDiv.querySelectorAll(".order-row").forEach(r => r.classList.add("correct"));
+    };
+  }
+
+  // 6. HOTSPOT
+  function initHotspot(f, idx, bodyEl) {
+    const svgOuter = document.createElement("div");
+    svgOuter.className = "svg-box";
+    const wrapper = document.createElement("div");
+    wrapper.className = "hotspot-wrapper";
+    wrapper.innerHTML = f.svg || "";
+
+    const qList = document.createElement("div");
+    qList.className = "hotspot-questions";
+
+    const selects = [];
+    const optionsPool = f.pontok.map(p => p.helyes_valasz).sort(() => Math.random() - 0.5);
+
+    f.pontok.forEach((pt, pIdx) => {
+      const pin = document.createElement("button");
+      pin.type = "button";
+      pin.className = "hotspot-pin";
+      pin.textContent = String(pIdx + 1);
+      pin.style.left = pt.x + "%";
+      pin.style.top = pt.y + "%";
+      wrapper.appendChild(pin);
+
+      const row = document.createElement("div");
+      row.className = "hotspot-q-row";
+      const lbl = document.createElement("span");
+      lbl.innerHTML = "<strong>" + (pIdx + 1) + ". pont:</strong> " + (pt.leiras || "Mit jelöl ez a pont?");
+
+      const sel = document.createElement("select");
+      sel.className = "hotspot-select";
+      const defOpt = document.createElement("option");
+      defOpt.value = "";
+      defOpt.textContent = "-- Válassz a listából --";
+      sel.appendChild(defOpt);
+
+      optionsPool.forEach(optText => {
+        const o = document.createElement("option");
+        o.value = optText;
+        o.textContent = optText;
+        sel.appendChild(o);
+      });
+
+      pin.onclick = () => {
+        wrapper.querySelectorAll(".hotspot-pin").forEach(x => x.classList.remove("active"));
+        pin.classList.add("active");
+        sel.focus();
+      };
+
+      row.appendChild(lbl);
+      row.appendChild(sel);
+      qList.appendChild(row);
+      selects.push({ sel, row, answer: pt.helyes_valasz });
+    });
+
+    svgOuter.appendChild(wrapper);
+    bodyEl.appendChild(svgOuter);
+    bodyEl.appendChild(qList);
+
+    document.getElementById("check-btn-" + idx).onclick = () => {
+      let okDb = 0;
+      selects.forEach(item => {
+        item.sel.disabled = true;
+        if (item.sel.value === item.answer) {
+          item.row.classList.add("correct");
+          okDb++;
+        } else {
+          item.row.classList.add("wrong");
+        }
+      });
+      const score = Math.round((okDb / selects.length) * f.pont);
+      document.getElementById("check-btn-" + idx).disabled = true;
+      document.getElementById("fb-" + idx).textContent = "Helyes találat: " + okDb + "/" + selects.length + " (" + score + " / " + f.pont + " pont)";
+      rogzoitFeladatEredmenyt(idx, score, f.pont);
+    };
+
+    document.getElementById("retry-btn-" + idx).onclick = () => {
+      selects.forEach(item => {
+        item.sel.value = "";
+        item.sel.disabled = false;
+        item.row.classList.remove("correct", "wrong");
+      });
+      document.getElementById("check-btn-" + idx).disabled = false;
+      document.getElementById("fb-" + idx).textContent = "";
+    };
+
+    document.getElementById("sol-btn-" + idx).onclick = () => {
+      selects.forEach(item => {
+        item.sel.value = item.answer;
+        item.row.classList.remove("wrong");
+        item.row.classList.add("correct");
+      });
+    };
+  }
+
+  // 7. CROSSWORD
+  function initCrossword(f, idx, bodyEl) {
+    const rows = f.sorok;
+    const cols = f.oszlopok;
+    const cellMap = {};
+
+    f.szavak.forEach(w => {
+      const word = w.szo.toUpperCase();
+      for (let i = 0; i < word.length; i++) {
+        const r = w.irany === "V" ? w.sor : w.sor + i;
+        const c = w.irany === "V" ? w.oszlop + i : w.oszlop;
+        const key = r + "_" + c;
+        if (!cellMap[key]) cellMap[key] = { char: word[i], num: null };
+        if (i === 0) cellMap[key].num = w.szam;
+      }
+    });
+
+    const layout = document.createElement("div");
+    layout.className = "cw-layout";
+
+    const grid = document.createElement("div");
+    grid.className = "cw-grid";
+    grid.style.gridTemplateColumns = "repeat(" + cols + ", 34px)";
+
+    const inputs = [];
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const key = r + "_" + c;
+        const cell = document.createElement("div");
+        cell.className = "cw-cell";
+        if (cellMap[key]) {
+          cell.classList.add("active-cell");
+          if (cellMap[key].num !== null) {
+            const numSpan = document.createElement("span");
+            numSpan.className = "cw-num";
+            numSpan.textContent = cellMap[key].num;
+            cell.appendChild(numSpan);
+          }
+          const inp = document.createElement("input");
+          inp.type = "text";
+          inp.maxLength = 1;
+          inp.className = "cw-input";
+          inp.dataset.expected = cellMap[key].char;
+          cell.appendChild(inp);
+          inputs.push(inp);
+        }
+        grid.appendChild(cell);
+      }
     }
 
-    const fb = document.getElementById('fb_' + idx);
-    fb.textContent = `Elért pontszám: ${elert} / ${f.pont} pont.`;
-    fb.className = 'feedback ' + (elert === f.pont ? 'ok' : 'err');
+    const clues = document.createElement("div");
+    clues.className = "cw-clues";
+    let vizszintesHtml = "<h4>Vízszintes</h4><ul>";
+    let fuggolegesHtml = "<h4>Függőleges</h4><ul>";
+    f.szavak.forEach(w => {
+      const li = "<li><strong>" + w.szam + ".</strong> " + w.meghatarozas + "</li>";
+      if (w.irany === "V") vizszintesHtml += li;
+      else fuggolegesHtml += li;
+    });
+    vizszintesHtml += "</ul>";
+    fuggolegesHtml += "</ul>";
+    clues.innerHTML = vizszintesHtml + fuggolegesHtml;
 
-    rogzitReszeredmeny(idx, elert, f.pont);
-  };
+    layout.appendChild(grid);
+    layout.appendChild(clues);
+    bodyEl.appendChild(layout);
 
-  window.ujra = function(idx) {
-    const f = FELADAT_ADAT.feladatok[idx];
-    document.getElementById('chk_' + idx).disabled = false;
-    const fb = document.getElementById('fb_' + idx);
-    fb.className = 'feedback';
-    fb.textContent = '';
-    epitsFeladatTest(f, idx);
-  };
+    document.getElementById("check-btn-" + idx).onclick = () => {
+      let okChars = 0;
+      inputs.forEach(inp => {
+        inp.disabled = true;
+        if (inp.value.trim().toUpperCase() === inp.dataset.expected) {
+          inp.classList.add("correct");
+          okChars++;
+        } else {
+          inp.classList.add("wrong");
+        }
+      });
+      const score = Math.round((okChars / inputs.length) * f.pont);
+      document.getElementById("check-btn-" + idx).disabled = true;
+      document.getElementById("fb-" + idx).textContent = "Helyes betűk: " + okChars + "/" + inputs.length + " (" + score + " / " + f.pont + " pont)";
+      rogzoitFeladatEredmenyt(idx, score, f.pont);
+    };
 
-  window.megoldas = function(idx) {
-    const f = FELADAT_ADAT.feladatok[idx];
-    if (f.tipus === 'drag_words') {
-      document.querySelectorAll(`#task_${idx} .drop-slot`).forEach((sl, i) => {
-        sl.textContent = f.megoldasok[i];
-        sl.className = 'drop-slot correct';
+    document.getElementById("retry-btn-" + idx).onclick = () => {
+      inputs.forEach(inp => {
+        inp.value = "";
+        inp.disabled = false;
+        inp.classList.remove("correct", "wrong");
       });
-    } else if (f.tipus === 'blanks') {
-      document.querySelectorAll(`#task_${idx} .blank-inp`).forEach((inp, i) => {
-        const m = Array.isArray(f.megoldasok[i]) ? f.megoldasok[i][0] : f.megoldasok[i];
-        inp.value = m;
-        inp.className = 'blank-inp correct';
+      document.getElementById("check-btn-" + idx).disabled = false;
+      document.getElementById("fb-" + idx).textContent = "";
+    };
+
+    document.getElementById("sol-btn-" + idx).onclick = () => {
+      inputs.forEach(inp => {
+        inp.value = inp.dataset.expected;
+        inp.classList.remove("wrong");
+        inp.classList.add("correct");
       });
-    } else if (f.tipus === 'group') {
-      const boxes = {};
-      document.querySelectorAll(`#task_${idx} .group-box`).forEach(b => boxes[b.dataset.group] = b);
-      document.querySelectorAll(`#task_${idx} .group-item`).forEach(it => {
-        boxes[it.dataset.target].appendChild(it);
-        it.className = 'group-item correct';
-      });
-    } else if (f.tipus === 'multi') {
-      document.querySelectorAll(`#task_${idx} input[type="checkbox"]`).forEach((cb, i) => {
-        cb.checked = f.opciok[i].helyes;
-        cb.closest('.multi-opt').className = 'multi-opt ' + (f.opciok[i].helyes ? 'correct' : '');
-      });
-    } else if (f.tipus === 'order') {
-      const ul = document.querySelector(`#task_${idx} .order-list`);
-      const items = Array.from(ul.children).sort((a, b) => Number(a.dataset.correctIdx) - Number(b.dataset.correctIdx));
-      items.forEach(li => {
-        li.className = 'order-item correct';
-        ul.appendChild(li);
-      });
-    } else if (f.tipus === 'hotspot') {
-      document.querySelectorAll(`#task_${idx} .hs-pin`).forEach((pin, i) => {
-        pin.dataset.chosen = f.pontok[i].helyes;
-        pin.className = 'hs-pin correct';
-      });
-    } else if (f.tipus === 'crossword') {
-      document.querySelectorAll(`#task_${idx} .cw-cell.active`).forEach(cell => {
-        cell.querySelector('.cw-inp').value = cell.dataset.char;
-        cell.className = 'cw-cell active correct';
-      });
-    }
-  };
+    };
+  }
 </script>
 </body>
 </html>
