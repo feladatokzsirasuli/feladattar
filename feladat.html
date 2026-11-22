@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fizika szorgalmi feladatlap</title>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <style>
+    :root {
+      --primary: #1e40af;
+      --primary-light: #eff6ff;
+      --accent: #0284c7;
+      --success: #15803d;
+      --success-bg: #dcfce7;
+      --danger: #b91c1c;
+      --danger-bg: #fee2e2;
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --text: #1e293b;
+      --muted: #64748b;
+      --border: #cbd5e1;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding-bottom: 60px;
+    }
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: #0f172a;
+      color: #fff;
+      padding: 12px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+    .topbar-title { font-weight: 700; font-size: 1.05rem; }
+    .topbar-meta { display: flex; gap: 15px; align-items: center; font-size: 0.92rem; }
+    .badge {
+      background: #1e293b;
+      border: 1px solid #334155;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+    .badge.practice { background: #7c2d12; border-color: #ea580c; color: #ffedd5; }
+    .container {
+      max-width: 900px;
+      margin: 25px auto;
+      padding: 0 16px;
+    }
+    .header-card {
+      background: linear-gradient(135deg, #1e3a8a, #0284c7);
+      color: #fff;
+      padding: 26px;
+      border-radius: 14px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 15px rgba(30, 58, 138, 0.2);
+    }
+    .header-card h1 { margin: 0 0 8px 0; font-size: 1.6rem; }
+    .header-card p { margin: 0; opacity: 0.92; }
+    .section-divider {
+      margin: 30px 0 14px 0;
+      padding: 8px 14px;
+      background: #e2e8f0;
+      border-left: 5px solid var(--primary);
+      font-weight: 700;
+      color: #0f172a;
+      border-radius: 0 8px 8px 0;
+    }
+    .task-card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 22px;
+      margin-bottom: 22px;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+      border: 1px solid #e2e8f0;
+    }
+    .task-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 12px;
+      border-bottom: 1px solid #f1f5f9;
+      padding-bottom: 10px;
+    }
+    .task-title { font-size: 1.15rem; font-weight: 700; color: var(--primary); margin: 0; }
+    .task-points {
+      background: var(--primary-light);
+      color: var(--primary);
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-size: 0.88rem;
+      white-space: nowrap;
+    }
+    .task-desc { margin: 0 0 14px 0; color: #334155; }
+    .situation-box {
+      background: #f8fafc;
+      border-left: 4px solid var(--accent);
+      padding: 12px 16px;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 16px;
+      font-size: 0.96rem;
+    }
+    .svg-box {
+      margin: 14px 0 18px 0;
+      padding: 12px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      text-align: center;
+      overflow-x: auto;
+    }
+    .svg-box svg { max-width: 100%; height: auto; }
+    /* Drag Words */
+    .word-bank {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 12px;
+      background: #f8fafc;
+      border: 1px dashed #94a3b8;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      min-height: 48px;
+    }
+    .word-chip {
+      background: #fff;
+      border: 1px solid #94a3b8;
+      padding: 5px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      user-select: none;
+      transition: all 0.15s;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    .word-chip:hover { border-color: var(--primary); background: var(--primary-light); }
+    .word-chip.selected { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .word-chip.used { opacity: 0.35; pointer-events: none; }
+    .drop-slot {
+      display: inline-block;
+      min-width: 115px;
+      padding: 2px 10px;
+      margin: 2px 4px;
+      border-bottom: 2px solid var(--primary);
+      background: var(--primary-light);
+      border-radius: 4px;
+      text-align: center;
+      font-weight: 700;
+      color: var(--primary);
+      cursor: pointer;
+      vertical-align: baseline;
+    }
+    .drop-slot.correct { background: var(--success-bg); border-color: var(--success); color: var(--success); }
+    .drop-slot.wrong { background: var(--danger-bg); border-color: var(--danger); color: var(--danger); }
+    /* Blanks */
+    .blank-input {
+      border: 1px solid #94a3b8;
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 0.98rem;
+      font-weight: 600;
+      width: 150px;
+      margin: 2px 4px;
+      background: #fff;
+    }
+    .blank-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(30,64,175,0.15); }
+    .blank-input.correct { background: var(--success-bg); border-color: var(--success); color: var(--success); }
+    .blank-input.wrong { background: var(--danger-bg); border-color: var(--danger); color: var(--danger); }
+    .def-list { list-style: none; padding: 0; margin: 0; }
+    .def-list li {
+      padding: 10px 12px;
+      background: #f8fafc;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      border: 1px solid #e2e8f0;
+    }
+    /* Group */
+    .group-items {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .group-item-card {
+      padding: 10px 14px;
+      background: #fff;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+    .group-item-card:hover { border-color: var(--primary); }
+    .group-item-card.selected { background: var(--primary-light); border-color: var(--primary); box-shadow: 0 0 0 2px rgba(30,64,175,0.2); }
+    .group-boxes {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 14px;
+    }
+    .group-box {
+      border: 2px dashed #94a3b8;
+      border-radius: 10px;
+      padding: 12px;
+      min-height: 150px;
+      background: #f8fafc;
+      cursor: pointer;
+    }
+    .group-box h4 {
+      margin: 0 0 10px 0;
+      text-align: center;
+      color: var(--primary);
+      border-bottom: 1px solid #cbd5e1;
+      padding-bottom: 6px;
+    }
+    .grouped-chip {
+      padding: 8px 10px;
+      background: #fff;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      margin-bottom: 6px;
+      font-size: 0.92rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+    .grouped-chip.correct { background: var(--success-bg); border-color: var(--success); color: var(--success); }
+    .grouped-chip.wrong { background: var(--danger-bg); border-color: var(--danger); color: var(--danger); }
+    /* Multi */
+    .multi-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 14px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      background: #fff;
+    }
+    .multi-option:hover { background: #f8fafc; }
+    .multi-option input { margin-top: 4px; transform: scale(1.2); }
+    .multi-option.correct { background: var(--success-bg); border-color: var(--success); color: var(--success); font-weight: 600; }
+    .multi-option.wrong { background: var(--danger-bg); border-color: var(--danger); color: var(--danger); }
+    /* Order */
+    .order-list { list-style: none; padding: 0; margin: 0; }
+    .order-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 14px;
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+    .order-item.correct { background: var(--success-bg); border-color: var(--success); color: var(--success); }
+    .order-item.wrong { background: var(--danger-bg); border-color: var(--danger); color: var(--danger); }
+    .order-btns { display: flex; gap: 4px; flex-shrink: 0; }
+    .order-btn {
+      background: #fff;
+      border: 1px solid #94a3b8;
+      border-radius: 5px;
+      padding: 4px 9px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+    .order-btn:hover { background: var(--primary-light); border-color: var(--primary); }
+    /* Controls & Feedback */
+    .task-actions {
+      margin-top: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+    .btn {
+      border: none;
+      padding: 9px 18px;
+      border-radius: 7px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-check { background: var(--primary); color: #fff; }
+    .btn-check:hover { background: #1e3a8a; }
+    .btn-check:disabled { background: #94a3b8; cursor: not-allowed; }
+    .btn-retry { background: #e2e8f0; color: #0f172a; display: none; }
+    .btn-retry:hover { background: #cbd5e1; }
+    .btn-sol { background: #fef3c7; color: #92400e; border: 1px solid #f59e0b; display: none; }
+    .btn-sol:hover { background: #fde68a; }
+    .feedback-box {
+      margin-top: 12px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-weight: 600;
+      display: none;
+    }
+    .feedback-box.ok { background: var(--success-bg); color: var(--success); display: block; }
+    .feedback-box.partial { background: #fef9c3; color: #854d0e; display: block; }
+    .feedback-box.bad { background: var(--danger-bg); color: var(--danger); display: block; }
+    .solution-box {
+      margin-top: 10px;
+      padding: 12px 14px;
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-radius: 8px;
+      font-size: 0.92rem;
+      color: #78350f;
+      display: none;
+    }
+    .locked { pointer-events: none; opacity: 0.88; }
+    .summary-card {
+      background: #fff;
+      border: 2px solid var(--primary);
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 30px;
+      text-align: center;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-title" id="top-title">Fizika feladatlap</div>
+  <div class="topbar-meta">
+    <span class="badge" id="student-badge">Tanuló: -</span>
+    <span class="badge" id="progress-badge">Ellenőrizve: 0 / 0</span>
+    <span class="badge" id="score-badge">Pontszám: 0 / 0</span>
+  </div>
+</div>
+
+<div class="container">
+  <div class="header-card">
+    <h1 id="main-title">Betöltés...</h1>
+    <p id="main-subtitle"></p>
+  </div>
+
+  <div id="tasks-root"></div>
+
+  <div class="summary-card" id="summary-card">
+    <h2 style="margin-top:0; color: var(--primary);">Feladatsor összesítése</h2>
+    <p id="summary-text" style="font-size:1.1rem; font-weight:600;"></p>
+    <p id="summary-grade" style="font-size:1.25rem; font-weight:700; color: var(--success);"></p>
+  </div>
+</div>
+
+<script>
+  // === 1. FIREBASE KONFIGURÁCIÓ ===
+  const firebaseConfig = {
+    apiKey: "AIzaSyC4ypKsFziwbyOQ87Sb-1PrrIZcvLf1_xQ",
+    authDomain: "fizikadomino.firebaseapp.com",
+    databaseURL: "https://fizikadomino-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "fizikadomino",
+    storageBucket: "fizikadomino.firebasestorage.app",
+    messagingSenderId: "272119065201",
+    appId: "1:272119065201:web:c6bdc223fd9a61394f49d0",
+    measurementId: "G-6PNNLQV1GH"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const adatbazis = firebase.database();
+
+  let diakNeve = "";
+  let marMentve = false;
+  let reszEredmenyek = {};
+  let DATA = null;
+
+  // URL paraméter (?tema=fenytan) kiolvasása
+  const urlParams = new URLSearchParams(window.location.search);
+  const temaFajl = (urlParams.get("tema") || "fenytan").replace(/[^a-zA-Z0-9_-]/g, "");
+
+  // Dinamikus adatfájl betöltése
+  const scriptElem = document.createElement("script");
+  scriptElem.src = temaFajl + ".js";
+  scriptElem.onload = function () {
+    if (!window.FELADAT_ADATOK) {
+      alert("Hiba: A feladatadatok nem találhatók a " + temaFajl + ".js fájlban!");
+      return;
+    }
+    DATA = window.FELADAT_ADATOK;
+    initApp();
+  };
+  scriptElem.onerror = function () {
+    document.getElementById("main-title").textContent = "Hiba a feladat betöltésekor";
+    document.getElementById("main-subtitle").textContent = "Nem található a következő fájl: " + temaFajl + ".js";
+  };
+  document.head.appendChild(scriptElem);
+
+  function initApp() {
+    document.title = DATA.cim;
+    document.getElementById("top-title").textContent = DATA.cim;
+    document.getElementById("main-title").textContent = DATA.cim;
+    document.getElementById("main-subtitle").textContent = DATA.alcim || "";
+    updateScoreHeader();
+    renderTasks();
+    kerjNevet();
+  }
+
+  function kerjNevet() {
+    let beirtNev = prompt("Kérlek, add meg a teljes nevedet a feladat megkezdéséhez:");
+    if (beirtNev === null || beirtNev === undefined || beirtNev.trim() === "") {
+      alert("A név megadása kötelező a feladat elindításához!");
+      kerjNevet();
+      return;
+    }
+    diakNeve = beirtNev.trim();
+    document.getElementById("student-badge").textContent = "Tanuló: " + diakNeve;
+
+    const ellenorzoKulcs = (diakNeve + "_" + DATA.feladat_id).toLowerCase();
+
+    adatbazis.ref("Szorgalmi").orderByChild("nev_feladat").equalTo(ellenorzoKulcs).once("value")
+      .then(snapshot => {
+        if (snapshot.exists()) {
+          alert("Figyelem! Ezt a konkrét feladatsort ezzel a névvel (" + diakNeve + ") már egyszer beküldted! Gyakorolni szabad, de új pontszámot nem rögzítek a naplóba.");
+          marMentve = true;
+          const sb = document.getElementById("student-badge");
+          sb.classList.add("practice");
+          sb.textContent = "Tanuló: " + diakNeve + " (Gyakorló mód)";
+          frissitGombLathatosag();
+        } else {
+          marMentve = false;
+        }
+        megjelenitSzabalyzatot();
+      })
+      .catch(err => {
+        console.error("Firebase névellenőrzési hiba:", err);
+        megjelenitSzabalyzatot();
+      });
+  }
+
+  function megjelenitSzabalyzatot() {
+    const modalHTML = `
+      <div id="szabalyzat-modal-overlay" style="
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background-color: rgba(0, 0, 0, 0.72); z-index: 99999;
+        display: flex; justify-content: center; align-items: center;
+        font-family: Arial, sans-serif;
+      ">
+        <div style="
+          background-color: #ffffff; border-top: 6px solid #cc0000;
+          width: 90%; max-width: 520px; padding: 25px; border-radius: 10px;
+          box-shadow: 0 10px 25px rgba(0,0,0,0.3); box-sizing: border-box;
+        ">
+          <h3 style="color: #cc0000; margin-top: 0; margin-bottom: 15px; font-size: 20px; text-align: center;">
+            ⚠️ Fontos szabályok a kitöltéshez!
+          </h3>
+          <p style="color: #333; font-size: 15px; line-height: 1.5; margin-bottom: 12px;">
+            Mielőtt hozzáfognál a feladatokhoz, kérlek olvasd el figyelmesen a szabályokat:
+          </p>
+          <ul style="margin: 12px 0; padding-left: 20px; color: #444; font-size: 14px; line-height: 1.6;">
+            <li style="margin-bottom: 8px;">Minden feladat megoldása után rá <strong>KELL</strong> kattintanod az <strong>Ellenőrzés</strong> gombra!</li>
+            <li style="margin-bottom: 8px;">Az Ellenőrzés gomb megnyomása után a válaszod rögzül, azt utólag már <strong>NEM lehet módosítani</strong>!</li>
+            <li style="margin-bottom: 8px;">A pontjaidat a rendszer automatikusan küldi a tanári naplóba, amint az összes (${DATA.feladatok.length} db) feladatot leellenőrizted.</li>
+            <li style="margin-bottom: 8px;">A megoldások és az újrakezdés csak az összes feladat véglegesítése után válnak elérhetővé.</li>
+          </ul>
+          <div style="text-align: center; margin-top: 22px;">
+            <button onclick="document.getElementById('szabalyzat-modal-overlay').remove();" style="
+              background-color: #cc0000; color: white; border: none;
+              padding: 12px 26px; font-size: 15px; font-weight: bold;
+              border-radius: 6px; cursor: pointer;
+            ">Értettem, kezdem a feladatot!</button>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.insertAdjacentHTML("beforeend", modalHTML);
+  }
+
+  function normalizeText(str) {
+    return (str || "").toString().trim().toLowerCase().replace(/\s+/g, " ");
+  }
+
+  function getMaxTotalPoints() {
+    return DATA.feladatok.reduce((sum, f) => sum + f.pont, 0);
+  }
+
+  function updateScoreHeader() {
+    const totalTasks = DATA.feladatok.length;
+    const checkedCount = Object.keys(reszEredmenyek).length;
+    let currentScore = 0;
+    for (let k in reszEredmenyek) currentScore += reszEredmenyek[k].elert;
+    document.getElementById("progress-badge").textContent = `Ellenőrizve: ${checkedCount} / ${totalTasks}`;
+    document.getElementById("score-badge").textContent = `Pontszám: ${currentScore} / ${getMaxTotalPoints()}`;
+  }
+
+  function frissitGombLathatosag() {
+    document.querySelectorAll(".btn-retry, .btn-sol").forEach(btn => {
+      btn.style.display = marMentve ? "inline-block" : "none";
+    });
+  }
+
+  function renderTasks() {
+    const root = document.getElementById("tasks-root");
+    root.innerHTML = "";
+    let lastSection = "";
+
+    DATA.feladatok.forEach((f, idx) => {
+      if (f.szekcio && f.szekcio !== lastSection) {
+        lastSection = f.szekcio;
+        const secDiv = document.createElement("div");
+        secDiv.className = "section-divider";
+        secDiv.textContent = f.szekcio;
+        root.appendChild(secDiv);
+      }
+
+      const card = document.createElement("div");
+      card.className = "task-card";
+      card.id = "task-card-" + idx;
+
+      let html = `
+        <div class="task-header">
+          <h3 class="task-title">${idx + 1}. feladat: ${f.cim}</h3>
+          <span class="task-points">${f.pont} pont</span>
+        </div>
+        <p class="task-desc">${f.utasitas}</p>
+      `;
+
+      if (f.szituacio) {
+        html += `<div class="situation-box">${f.szituacio}</div>`;
+      }
+      if (f.svg) {
+        html += `<div class="svg-box">${f.svg}</div>`;
+      }
+
+      html += `<div id="task-body-${idx}"></div>`;
+      html += `
+        <div class="task-actions">
+          <button class="btn btn-check" id="btn-check-${idx}" onclick="checkTask(${idx})">Ellenőrzés</button>
+          <button class="btn btn-retry" id="btn-retry-${idx}" onclick="retryTask(${idx})">Újra</button>
+          <button class="btn btn-sol" id="btn-sol-${idx}" onclick="toggleSolution(${idx})">Megoldás mutatása</button>
+        </div>
+        <div class="feedback-box" id="fb-${idx}"></div>
+        <div class="solution-box" id="sol-${idx}"></div>
+      `;
+
+      card.innerHTML = html;
+      root.appendChild(card);
+      renderTaskBody(f, idx);
+    });
+    frissitGombLathatosag();
+  }
+
+  // Állapotok feladattípusonként
+  const taskState = {};
+
+  function renderTaskBody(f, idx) {
+    const body = document.getElementById("task-body-" + idx);
+    body.classList.remove("locked");
+
+    if (f.tipus === "drag_words") {
+      // Kevert szóbank
+      const allWords = [...f.megoldasok, ...(f.zavaro || [])].sort(() => Math.random() - 0.5);
+      taskState[idx] = { selectedWordIdx: null, slots: Array(f.megoldasok.length).fill(null), words: allWords };
+
+      let bankHtml = `<div class="word-bank" id="bank-${idx}">`;
+      allWords.forEach((w, wIdx) => {
+        bankHtml += `<span class="word-chip" id="chip-${idx}-${wIdx}" onclick="selectWordChip(${idx}, ${wIdx})">${w}</span>`;
+      });
+      bankHtml += `</div>`;
+
+      let textHtml = f.szoveg;
+      f.megoldasok.forEach((_, sIdx) => {
+        textHtml = textHtml.replace(`{${sIdx}}`, `<span class="drop-slot" id="slot-${idx}-${sIdx}" onclick="clickSlot(${idx}, ${sIdx})">[ kattints ide ]</span>`);
+      });
+
+      body.innerHTML = bankHtml + `<div style="font-size:1.03rem; line-height:2.1;">${textHtml}</div>`;
+    }
+
+    else if (f.tipus === "blanks") {
+      if (f.definiciok) {
+        let listHtml = `<ul class="def-list">`;
+        f.definiciok.forEach((d, dIdx) => {
+          listHtml += `<li><strong>${dIdx + 1}.</strong> ${d.leiras} &rarr; <input type="text" class="blank-input" id="blank-${idx}-${dIdx}" placeholder="Fogalom..." autocomplete="off" /></li>`;
+        });
+        listHtml += `</ul>`;
+        body.innerHTML = listHtml;
+      } else {
+        let textHtml = f.szoveg;
+        f.megoldasok.forEach((_, bIdx) => {
+          textHtml = textHtml.replace(`{${bIdx}}`, `<input type="text" class="blank-input" id="blank-${idx}-${bIdx}" placeholder="..." autocomplete="off" />`);
+        });
+        body.innerHTML = `<div style="font-size:1.03rem; line-height:2.2;">${textHtml}</div>`;
+      }
+    }
+
+    else if (f.tipus === "group") {
+      const shuffled = f.elemek.map((el, i) => ({ ...el, origIdx: i })).sort(() => Math.random() - 0.5);
+      taskState[idx] = { selectedItem: null, items: shuffled, placements: {} };
+
+      let itemsHtml = `<div class="group-items" id="g-items-${idx}">`;
+      shuffled.forEach((item, i) => {
+        itemsHtml += `<div class="group-item-card" id="g-item-${idx}-${i}" onclick="selectGroupItem(${idx}, ${i})">${item.szoveg}</div>`;
+      });
+      itemsHtml += `</div>`;
+
+      let boxesHtml = `<div class="group-boxes">`;
+      f.kategoriak.forEach((kat, kIdx) => {
+        boxesHtml += `
+          <div class="group-box" onclick="placeGroupItem(${idx}, ${kIdx})">
+            <h4>${kat}</h4>
+            <div id="g-box-${idx}-${kIdx}"></div>
+          </div>
+        `;
+      });
+      boxesHtml += `</div>`;
+      body.innerHTML = itemsHtml + boxesHtml;
+    }
+
+    else if (f.tipus === "multi") {
+      let optHtml = `<div>`;
+      f.opciok.forEach((op, oIdx) => {
+        optHtml += `
+          <label class="multi-option" id="m-opt-${idx}-${oIdx}">
+            <input type="checkbox" id="m-chk-${idx}-${oIdx}" />
+            <span>${op.szoveg}</span>
+          </label>
+        `;
+      });
+      optHtml += `</div>`;
+      body.innerHTML = optHtml;
+    }
+
+    else if (f.tipus === "order") {
+      const shuffled = f.lepesek.map((txt, i) => ({ txt, origIdx: i })).sort(() => Math.random() - 0.5);
+      taskState[idx] = { currentOrder: shuffled };
+      renderOrderList(idx);
+    }
+  }
+
+  // Drag words interakció
+  function selectWordChip(idx, wIdx) {
+    const st = taskState[idx];
+    document.querySelectorAll(`#bank-${idx} .word-chip`).forEach(c => c.classList.remove("selected"));
+    if (st.selectedWordIdx === wIdx) {
+      st.selectedWordIdx = null;
+    } else {
+      st.selectedWordIdx = wIdx;
+      document.getElementById(`chip-${idx}-${wIdx}`).classList.add("selected");
+    }
+  }
+
+  function clickSlot(idx, sIdx) {
+    const st = taskState[idx];
+    const slotEl = document.getElementById(`slot-${idx}-${sIdx}`);
+    // Ha már van benne szó és nincs új kiválasztva -> visszateszi a bankba
+    if (st.slots[sIdx] !== null && st.selectedWordIdx === null) {
+      const oldWIdx = st.slots[sIdx];
+      document.getElementById(`chip-${idx}-${oldWIdx}`).classList.remove("used");
+      st.slots[sIdx] = null;
+      slotEl.textContent = "[ kattints ide ]";
+      return;
+    }
+    if (st.selectedWordIdx !== null) {
+      if (st.slots[sIdx] !== null) {
+        document.getElementById(`chip-${idx}-${st.slots[sIdx]}`).classList.remove("used");
+      }
+      const chosenWIdx = st.selectedWordIdx;
+      st.slots[sIdx] = chosenWIdx;
+      slotEl.textContent = st.words[chosenWIdx];
+      const chipEl = document.getElementById(`chip-${idx}-${chosenWIdx}`);
+      chipEl.classList.remove("selected");
+      chipEl.classList.add("used");
+      st.selectedWordIdx = null;
+    }
+  }
+
+  // Group interakció
+  function selectGroupItem(idx, itemIdx) {
+    const st = taskState[idx];
+    document.querySelectorAll(`#g-items-${idx} .group-item-card`).forEach(el => el.classList.remove("selected"));
+    st.selectedItem = (st.selectedItem === itemIdx) ? null : itemIdx;
+    if (st.selectedItem !== null) {
+      document.getElementById(`g-item-${idx}-${itemIdx}`).classList.add("selected");
+    }
+  }
+
+  function placeGroupItem(idx, katIdx) {
+    const st = taskState[idx];
+    if (st.selectedItem === null) return;
+    const itemIdx = st.selectedItem;
+    st.placements[itemIdx] = katIdx;
+    st.selectedItem = null;
+    document.getElementById(`g-item-${idx}-${itemIdx}`).style.display = "none";
+    renderGroupBoxes(idx);
+  }
+
+  function removeGroupItem(idx, itemIdx, ev) {
+    ev.stopPropagation();
+    const st = taskState[idx];
+    delete st.placements[itemIdx];
+    const card = document.getElementById(`g-item-${idx}-${itemIdx}`);
+    card.style.display = "block";
+    card.classList.remove("selected");
+    renderGroupBoxes(idx);
+  }
+
+  function renderGroupBoxes(idx) {
+    const f = DATA.feladatok[idx];
+    const st = taskState[idx];
+    f.kategoriak.forEach((_, kIdx) => {
+      document.getElementById(`g-box-${idx}-${kIdx}`).innerHTML = "";
+    });
+    for (let itemIdx in st.placements) {
+      const kIdx = st.placements[itemIdx];
+      const box = document.getElementById(`g-box-${idx}-${kIdx}`);
+      const div = document.createElement("div");
+      div.className = "grouped-chip";
+      div.id = `placed-${idx}-${itemIdx}`;
+      div.innerHTML = `<span>${st.items[itemIdx].szoveg}</span><button type="button" style="border:none;background:none;color:#b91c1c;font-weight:bold;cursor:pointer;" onclick="removeGroupItem(${idx}, ${itemIdx}, event)">✕</button>`;
+      box.appendChild(div);
+    }
+  }
+
+  // Order interakció
+  function renderOrderList(idx) {
+    const body = document.getElementById("task-body-" + idx);
+    const list = taskState[idx].currentOrder;
+    let html = `<ul class="order-list">`;
+    list.forEach((item, pos) => {
+      html += `
+        <li class="order-item" id="ord-${idx}-${pos}">
+          <span><strong>${pos + 1}.</strong> ${item.txt}</span>
+          <div class="order-btns">
+            <button type="button" class="order-btn" onclick="moveOrder(${idx}, ${pos}, -1)" ${pos === 0 ? "disabled" : ""}>▲</button>
+            <button type="button" class="order-btn" onclick="moveOrder(${idx}, ${pos}, 1)" ${pos === list.length - 1 ? "disabled" : ""}>▼</button>
+          </div>
+        </li>
+      `;
+    });
+    html += `</ul>`;
+    body.innerHTML = html;
+  }
+
+  function moveOrder(idx, pos, dir) {
+    const list = taskState[idx].currentOrder;
+    const target = pos + dir;
+    if (target < 0 || target >= list.length) return;
+    [list[pos], list[target]] = [list[target], list[pos]];
+    renderOrderList(idx);
+  }
+
+  // Kiértékelés
+  function checkTask(idx) {
+    const f = DATA.feladatok[idx];
+    let earned = 0;
+    let solText = "";
+
+    if (f.tipus === "drag_words") {
+      const st = taskState[idx];
+      f.megoldasok.forEach((ans, sIdx) => {
+        const slotEl = document.getElementById(`slot-${idx}-${sIdx}`);
+        const wIdx = st.slots[sIdx];
+        const userWord = wIdx !== null ? st.words[wIdx] : "";
+        if (normalizeText(userWord) === normalizeText(ans)) {
+          earned += 1;
+          slotEl.classList.add("correct");
+        } else {
+          slotEl.classList.add("wrong");
+        }
+      });
+      solText = "Helyes sorrend: " + f.megoldasok.join(", ");
+    }
+
+    else if (f.tipus === "blanks") {
+      const items = f.definiciok ? f.definiciok.map(d => d.megoldas) : f.megoldasok;
+      items.forEach((acceptedList, bIdx) => {
+        const inp = document.getElementById(`blank-${idx}-${bIdx}`);
+        const val = normalizeText(inp.value);
+        const validOptions = Array.isArray(acceptedList) ? acceptedList : [acceptedList];
+        if (validOptions.some(v => normalizeText(v) === val)) {
+          earned += 1;
+          inp.classList.add("correct");
+        } else {
+          inp.classList.add("wrong");
+        }
+      });
+      solText = "Elfogadott válaszok: " + items.map(x => Array.isArray(x) ? x.join(" / ") : x).join("; ");
+    }
+
+    else if (f.tipus === "group") {
+      const st = taskState[idx];
+      let correctCount = 0;
+      st.items.forEach((item, i) => {
+        const placedKat = st.placements[i];
+        const chipEl = document.getElementById(`placed-${idx}-${i}`);
+        if (placedKat !== undefined && placedKat === item.kategoria) {
+          correctCount++;
+          if (chipEl) chipEl.classList.add("correct");
+        } else {
+          if (chipEl) chipEl.classList.add("wrong");
+        }
+      });
+      earned = Math.round((correctCount / st.items.length) * f.pont);
+      solText = f.kategoriak.map((k, kIdx) => `<strong>${k}:</strong> ` + f.elemek.filter(e => e.kategoria === kIdx).map(e => e.szoveg).join(" | ")).join("<br>");
+    }
+
+    else if (f.tipus === "multi") {
+      let score = 0;
+      f.opciok.forEach((op, oIdx) => {
+        const chk = document.getElementById(`m-chk-${idx}-${oIdx}`);
+        const lbl = document.getElementById(`m-opt-${idx}-${oIdx}`);
+        if (chk.checked && op.helyes) {
+          score += 1;
+          lbl.classList.add("correct");
+        } else if (chk.checked && !op.helyes) {
+          score -= 1;
+          lbl.classList.add("wrong");
+        }
+      });
+      earned = Math.max(0, Math.min(f.pont, score));
+      solText = "Helyes állítások: " + f.opciok.filter(o => o.helyes).map(o => o.szoveg).join("; ");
+    }
+
+    else if (f.tipus === "order") {
+      const list = taskState[idx].currentOrder;
+      list.forEach((item, pos) => {
+        const li = document.getElementById(`ord-${idx}-${pos}`);
+        if (item.origIdx === pos) {
+          earned += 1;
+          li.classList.add("correct");
+        } else {
+          li.classList.add("wrong");
+        }
+      });
+      solText = "Helyes sorrend:<br>" + f.lepesek.map((s, i) => `${i + 1}. ${s}`).join("<br>");
+    }
+
+    // Zárolás és visszajelzés
+    document.getElementById("task-body-" + idx).classList.add("locked");
+    document.getElementById("btn-check-" + idx).disabled = true;
+
+    const fb = document.getElementById("fb-" + idx);
+    fb.className = "feedback-box " + (earned === f.pont ? "ok" : (earned > 0 ? "partial" : "bad"));
+    fb.textContent = `Elért pontszám ebben a feladatban: ${earned} / ${f.pont} pont.`;
+
+    document.getElementById("sol-" + idx).innerHTML = solText;
+
+    // Eredmény rögzítése
+    if (!(idx in reszEredmenyek)) {
+      reszEredmenyek[idx] = { elert: earned, max: f.pont };
+    }
+    updateScoreHeader();
+    ellenorizVeglegesitest();
+  }
+
+  function retryTask(idx) {
+    if (!marMentve) return;
+    document.getElementById("btn-check-" + idx).disabled = false;
+    const fb = document.getElementById("fb-" + idx);
+    fb.className = "feedback-box";
+    fb.textContent = "";
+    document.getElementById("sol-" + idx).style.display = "none";
+    renderTaskBody(DATA.feladatok[idx], idx);
+  }
+
+  function toggleSolution(idx) {
+    if (!marMentve) return;
+    const sol = document.getElementById("sol-" + idx);
+    sol.style.display = (sol.style.display === "block") ? "none" : "block";
+  }
+
+  function ellenorizVeglegesitest() {
+    const totalTasks = DATA.feladatok.length;
+    if (Object.keys(reszEredmenyek).length < totalTasks) return;
+
+    let vegsoElertPont = 0;
+    let vegsoMaxPont = 0;
+    for (let id in reszEredmenyek) {
+      vegsoElertPont += reszEredmenyek[id].elert;
+      vegsoMaxPont += reszEredmenyek[id].max;
+    }
+
+    // Érdemjegy kijelzése az oldal alján
+    const szazalek = Math.round((vegsoElertPont / vegsoMaxPont) * 100);
+    let jegy = "Elégtelen (1)";
+    if (szazalek >= 90) jegy = "Jeles (5)";
+    else if (szazalek >= 75) jegy = "Jó (4)";
+    else if (szazalek >= 60) jegy = "Közepes (3)";
+    else if (szazalek >= 40) jegy = "Elégséges (2)";
+
+    const sumCard = document.getElementById("summary-card");
+    sumCard.style.display = "block";
+    document.getElementById("summary-text").textContent = `Végső pontszám: ${vegsoElertPont} / ${vegsoMaxPont} pont (${szazalek}%)`;
+    document.getElementById("summary-grade").textContent = `Ajánlott értékelés: ${jegy}`;
+
+    if (marMentve) {
+      frissitGombLathatosag();
+      return;
+    }
+
+    marMentve = true;
+    frissitGombLathatosag();
+
+    const vegsoEredmeny = {
+      name: diakNeve,
+      feladat_id: DATA.feladat_id,
+      nev_feladat: (diakNeve + "_" + DATA.feladat_id).toLowerCase(),
+      score: vegsoElertPont,
+      max_score: vegsoMaxPont,
+      feladat: DATA.feladat || temaFajl,
+      idobelyeg: new Date().toLocaleString("hu-HU")
+    };
+
+    adatbazis.ref("Szorgalmi").push(vegsoEredmeny)
+      .then(() => {
+        alert("Köszönöm! A teljes feladatsort befejezted. A végső elért pontszámodat (" + vegsoElertPont + " / " + vegsoMaxPont + ") sikeresen rögzítettem a naplóba.\n\nMostantól átnézheted a hibáidat a feladatok alatt!");
+      })
+      .catch(error => {
+        console.error("Firebase küldési hiba:", error);
+        alert("Hiba történt a naplóba mentéskor! Kérlek ellenőrizd az internetkapcsolatot.");
+        marMentve = false;
+      });
+  }
+</script>
+</body>
+</html>
