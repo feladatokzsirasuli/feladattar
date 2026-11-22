@@ -67,10 +67,10 @@ window.FELADAT_ADATOK = {
       pont: 2,
       leiras: "Írd be a meghatározásoknak megfelelő optikai fogalmakat a rácsba (ékezetekkel)!",
       szavak: [
-        { szam: 1, sor: 1, oszlop: 2, irany: "V", szo: "FÓKUSZ", meghatarozas: "A párhuzamos fénysugarak találkozási pontja (más néven gyújtópont)." },
-        { szam: 2, sor: 1, oszlop: 3, irany: "F", szo: "OPTIKAI", meghatarozas: "Ilyen tengelye és középpontja van minden lencsének." },
-        { szam: 3, sor: 4, oszlop: 1, irany: "V", szo: "TÖRÉS", meghatarozas: "Ez a fényjelenség játszódik le a lencse két határfelületén." },
-        { szam: 4, sor: 6, oszlop: 2, irany: "V", szo: "SZÓRÓ", meghatarozas: "Középen vékonyabb, peremén vastagabb lencsetípus." }
+        { szam: 1, sor: 1, oszlop: 3, irany: "F", szo: "OPTIKAI", meghatarozas: "Ilyen tengelye és középpontja van minden lencsének." },
+        { szam: 2, sor: 1, oszlop: 2, irany: "V", szo: "FÓKUSZ", meghatarozas: "A párhuzamos fénysugarak találkozási pontja (más néven gyújtópont)." },
+        { szam: 3, sor: 3, oszlop: 3, irany: "V", szo: "TÖRÉS", meghatarozas: "Ez a fényjelenség játszódik le a lencse két határfelületén." },
+        { szam: 4, sor: 5, oszlop: 1, irany: "V", szo: "LUKAS", meghatarozas: "Nem tömör, hanem üreges (átlyukasztott)." }
       ]
     },
     {
