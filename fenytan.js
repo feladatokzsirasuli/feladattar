@@ -10,9 +10,8 @@ window.FELADAT_ADATOK = {
       tipus: "drag_words",
       pont: 5,
       utasitas: "Kattints egy szóra a szóbankban, majd kattints a megfelelő üres helyre a szövegben! (1 zavaró szó is van a listában.)",
-      szoveg: "A Nap és a csillagok {0} fényforrások, míg az izzólámpa és a gyertya {1} fényforrás. A növények növekedéséhez elengedhetetlen a napfény, amelyet a zöld színtestek a fotoszintézis során hasznosítanak – ez a fény {2} hatása. A napelemek a fény {3} hatását használják ki áramtermelésre, míg a sötét ruhák gyorsabb felmelegedése a fény {4} magyarázható.",
-      megoldasok: ["természetes", "mesterséges", "biológiai", "elektromos", "hőhatásával"],
-      zavaro: ["kémiai"]
+      szoveg: "A Nap és a csillagok *természetes* fényforrások, míg az izzólámpa és a gyertya *mesterséges* fényforrás. A növények növekedéséhez elengedhetetlen a napfény, amelyet a zöld színtestek a fotoszintézis során hasznosítanak – ez a fény *biológiai* hatása. A napelemek a fény *elektromos* hatását használják ki áramtermelésre, míg a sötét ruhák gyorsabb felmelegedése a fény *hőhatásával* magyarázható.",
+      extra: ["kémiai"]
     },
     {
       szekcio: "I. rész: Tárgyi tudás mérése (12 pont)",
