@@ -16,7 +16,7 @@ window.FELADAT_ADATOK = {
       tipus: "blanks",
       pont: 4,
       leiras: "Írd be a meghatározásoknak megfelelő fizikai fogalmakat!",
-      szoveg: "1. Sok fénysugár együttese, amelyet a gyakorlatban is megfigyelhetünk (pl. egy zseblámpa csóvája): [fénynyaláb]<br><br>2. Az árnyéknak az a része, ahová a kiterjedt fényforrásnak csak egy részéből jut fény: [félárnyék]<br><br>3. Ez az égitest kerül a Nap és a Föld közé teljes napfogyatkozáskor: [Hold|hold]<br><br>4. Az átlátszatlan test mögött kialakuló, fénytől elzárt térrész neve: [árnyékkúp]"
+      szoveg: "1. Vékony, párhuzamos fénnyaláb: [fénysugár]<br><br>2. Az árnyéknak az a része, ahová a kiterjedt fényforrásnak csak egy részéből jut fény: [félárnyék]<br><br>3. Ez az égitest kerül a Nap és a Föld közé teljes napfogyatkozáskor: [Hold|hold]<br><br>4. Az átlátszatlan test mögött kialakuló, fénytől elzárt térrész neve: [árnyékkúp]"
     },
     {
       cim: "3. feladat: Napfogyatkozás vagy holdfogyatkozás?",
