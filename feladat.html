@@ -866,14 +866,17 @@
       '<div class="svg-wrapper"><div class="hotspot-container">' + (task.svg || "") + pinsHtml + '</div></div>' + qHtml;
   }
 
+
   /* 7. CROSSWORD */
   function renderCrossword(task, idx, el) {
     const words = (task.szavak || []).map(function(w, i) {
+      const rawDir = String(w.irany || w.dir || "V").trim().toLowerCase();
+      const isVertical = rawDir.charAt(0) === "f" || rawDir.charAt(0) === "d";
       return {
         num: w.szam || (i + 1),
-        row: (w.sor !== undefined ? w.sor : w.row) - 1,
-        col: (w.oszlop !== undefined ? w.oszlop : w.col) - 1,
-        dir: (w.irany || w.dir || "V").toUpperCase(),
+        row: Math.max(0, (w.sor !== undefined ? w.sor : w.row) - 1),
+        col: Math.max(0, (w.oszlop !== undefined ? w.oszlop : w.col) - 1),
+        isVertical: isVertical,
         word: (w.szo || w.word || "").toUpperCase(),
         clue: w.meghatarozas || w.clue || ""
       };
@@ -882,8 +885,8 @@
     let maxR = 0, maxC = 0;
     words.forEach(function(w) {
       for (let i = 0; i < w.word.length; i++) {
-        const r = w.dir === "F" || w.dir === "D" ? w.row + i : w.row;
-        const c = w.dir === "V" || w.dir === "A" ? w.col + i : w.col;
+        const r = w.isVertical ? w.row + i : w.row;
+        const c = w.isVertical ? w.col : w.col + i;
         if (r > maxR) maxR = r;
         if (c > maxC) maxC = c;
       }
@@ -895,8 +898,8 @@
 
     words.forEach(function(w) {
       for (let i = 0; i < w.word.length; i++) {
-        const r = w.dir === "F" || w.dir === "D" ? w.row + i : w.row;
-        const c = w.dir === "V" || w.dir === "A" ? w.col + i : w.col;
+        const r = w.isVertical ? w.row + i : w.row;
+        const c = w.isVertical ? w.col : w.col + i;
         if (!gridData[r][c]) gridData[r][c] = { char: w.word[i], num: null };
         if (i === 0) gridData[r][c].num = w.num;
       }
@@ -904,7 +907,7 @@
 
     let gridHtml = '<div class="cw-grid" style="grid-template-columns:repeat(' + cols + ', 36px);">';
     for (let r = 0; r < rows; r++) {
-	for (let c = 0; c < cols; c++) {
+      for (let c = 0; c < cols; c++) {
         const cell = gridData[r][c];
         if (cell) {
           gridHtml +=
@@ -922,7 +925,7 @@
     let vClues = "", fClues = "";
     words.forEach(function(w) {
       const li = '<li><strong>' + w.num + '.</strong> ' + w.clue + ' (' + w.word.length + ' betű)</li>';
-      if (w.dir === "F" || w.dir === "D") fClues += li;
+      if (w.isVertical) fClues += li;
       else vClues += li;
     });
 
@@ -933,6 +936,9 @@
       (fClues ? '<h4>Függőleges:</h4><ul>' + fClues + '</ul>' : '') +
       '</div></div>';
   }
+
+
+
 
   /* CHECK & SCORE */
   function checkTask(task, idx) {
