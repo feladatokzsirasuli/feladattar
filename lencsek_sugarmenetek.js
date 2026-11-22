@@ -70,7 +70,7 @@ szavak: [
         { szam: 1, sor: 2, oszlop: 1, irany: "V", szo: "FÓKUSZ", meghatarozas: "A párhuzamos fénysugarak találkozási pontja (más néven gyújtópont)." },
         { szam: 2, sor: 1, oszlop: 4, irany: "F", szo: "SUGÁR", meghatarozas: "A fény terjedési irányát jelző egyenes vonal." },
         { szam: 3, sor: 1, oszlop: 6, irany: "F", szo: "SZÓRÓ", meghatarozas: "Középen vékonyabb, peremén vastagabb lencsetípus." },
-        { szam: 4, sor: 4, oszlop: 4, irany: "V", szo: "TÖRÉS", meghatarozas: "Ez a fényjelenség játszódik le a lencse két határfelületén." }
+        { szam: 4, sor: 4, oszlop: 5, irany: "V", szo: "TÖRÉS", meghatarozas: "Ez a fényjelenség játszódik le a lencse két határfelületén." }
       ]
     },
     {
