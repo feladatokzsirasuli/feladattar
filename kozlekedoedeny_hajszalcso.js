@@ -3,51 +3,51 @@ window.FELADAT_ADATOK = {
   feladat_id: "h5p_kozlekedoedeny_hajszalcso",
   feladat: "kozlekedoedeny_hajszalcso",
   feladatok: [
-    {
+   {
       cim: "1. Fogalmi keresztrejtvény (Tárgyi tudás)",
       tipus: "crossword",
       pont: 5,
-      leiras: "Oldd meg a közlekedőedényekhez és a hajszálcsövességhez kapcsolódó keresztrejtvényt!",
+      leiras: "Oldd meg a testek úszásához, lebegéséhez és elmerüléséhez kapcsolódó keresztrejtvényt!",
       szavak: [
         {
           szam: 1,
-          sor: 2,
+          sor: 3,
           oszlop: 1,
           irany: "V",
-          szo: "KAPILLARITÁS",
-          meghatarozas: "A hajszálcsövesség idegen eredetű elnevezése."
+          szo: "FELHAJTÓERŐ",
+          meghatarozas: "A folyadékba merülő testre ható, függőlegesen felfelé mutató erő."
         },
         {
           szam: 2,
-          sor: 1,
-          oszlop: 9,
+          sor: 3,
+          oszlop: 3,
           irany: "F",
-          szo: "HIGANY",
-          meghatarozas: "Ez a folyékony fém nem nedvesíti az üveget, ezért a hajszálcsőben süllyed a szintje."
+          szo: "LEBEGÉS",
+          meghatarozas: "Ez az állapot jön létre, ha a folyadékba merült test sűrűsége megegyezik a folyadék sűrűségével."
         },
         {
           szam: 3,
-          sor: 5,
-          oszlop: 9,
+          sor: 9,
+          oszlop: 3,
           irany: "V",
-          szo: "NYOMÁS",
-          meghatarozas: "A közlekedőedény minden ágában azonos mélységben pontosan ekkora a hidrosztatikai..."
+          szo: "SŰRŰSÉG",
+          meghatarozas: "Ettől a fizikai mennyiségtől függ, hogy egy adott test úszik, lebeg vagy elmerül a folyadékban."
         },
         {
           szam: 4,
           sor: 1,
-          oszlop: 2,
+          oszlop: 10,
           irany: "F",
-          szo: "TAPADÁS",
-          meghatarozas: "A folyadék és az edény fala között fellépő vonzó kölcsönhatás (adhézió), amely nedvesítéskor erősebb a kohéziónál."
+          szo: "TÉRFOGAT",
+          meghatarozas: "A kiszorított folyadéknak ez a mennyisége megegyezik a test bemerülő részének méretével."
         },
         {
           szam: 5,
           sor: 7,
-          oszlop: 2,
+          oszlop: 7,
           irany: "V",
-          szo: "SŰRŰSÉG",
-          meghatarozas: "Ettől a fizikai mennyiségtől függ, hogy két nem keveredő folyadék milyen magasan áll meg egy U-cső két szárában."
+          szo: "ÁTLAGSŰRŰSÉG",
+          meghatarozas: "Ez határozza meg, hogy a sok levegőt tartalmazó acélhajó a víz felszínén marad-e."
         }
       ]
     },
@@ -184,4 +184,5 @@ window.FELADAT_ADATOK = {
     }
   ]
 };
+
 
