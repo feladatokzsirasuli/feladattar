@@ -7,47 +7,47 @@ window.FELADAT_ADATOK = {
       cim: "1. Fogalmi keresztrejtvény (Tárgyi tudás)",
       tipus: "crossword",
       pont: 5,
-      leiras: "Oldd meg a testek úszásához, lebegéséhez és elmerüléséhez kapcsolódó keresztrejtvényt!",
+      leiras: "Oldd meg a közlekedőedényekhez és a hajszálcsövességhez kapcsolódó keresztrejtvényt!",
       szavak: [
         {
           szam: 1,
-          sor: 3,
+          sor: 2,
           oszlop: 1,
           irany: "V",
-          szo: "FELHAJTÓERŐ",
-          meghatarozas: "A folyadékba merülő testre ható, függőlegesen felfelé mutató erő."
+          szo: "KAPILLARITÁS",
+          meghatarozas: "A hajszálcsövesség idegen eredetű elnevezése."
         },
         {
           szam: 2,
-          sor: 3,
-          oszlop: 3,
+          sor: 1,
+          oszlop: 9,
           irany: "F",
-          szo: "LEBEGÉS",
-          meghatarozas: "Ez az állapot jön létre, ha a folyadékba merült test sűrűsége megegyezik a folyadék sűrűségével."
+          szo: "HIGANY",
+          meghatarozas: "Ez a folyékony fém nem nedvesíti az üveget, ezért a hajszálcsőben süllyed a szintje."
         },
         {
           szam: 3,
-          sor: 9,
-          oszlop: 3,
+          sor: 5,
+          oszlop: 9,
           irany: "V",
-          szo: "SŰRŰSÉG",
-          meghatarozas: "Ettől a fizikai mennyiségtől függ, hogy egy adott test úszik, lebeg vagy elmerül a folyadékban."
+          szo: "NYOMÁS",
+          meghatarozas: "A közlekedőedény minden ágában azonos mélységben pontosan ekkora a hidrosztatikai..."
         },
         {
           szam: 4,
           sor: 1,
-          oszlop: 10,
+          oszlop: 2,
           irany: "F",
-          szo: "TÉRFOGAT",
-          meghatarozas: "A kiszorított folyadéknak ez a mennyisége megegyezik a test bemerülő részének méretével."
+          szo: "TAPADÁS",
+          meghatarozas: "A folyadék és az edény fala között fellépő vonzó kölcsönhatás (adhézió), amely nedvesítéskor erősebb a kohéziónál."
         },
         {
           szam: 5,
           sor: 7,
-          oszlop: 7,
+          oszlop: 2,
           irany: "V",
-          szo: "ÁTLAGSŰRŰSÉG",
-          meghatarozas: "Ez határozza meg, hogy a sok levegőt tartalmazó acélhajó a víz felszínén marad-e."
+          szo: "SŰRŰSÉG",
+          meghatarozas: "Ettől a fizikai mennyiségtől függ, hogy két nem keveredő folyadék milyen magasan áll meg egy U-cső két szárában."
         }
       ]
     },
@@ -184,6 +184,7 @@ window.FELADAT_ADATOK = {
     }
   ]
 };
+
 
 
 
