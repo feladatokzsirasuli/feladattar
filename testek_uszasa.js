@@ -11,7 +11,7 @@ window.FELADAT_ADATOK = {
       szavak: [
         {
           szam: 1,
-          sor: 2,
+          sor: 3,
           oszlop: 1,
           irany: "V",
           szo: "FELHAJTÓERŐ",
@@ -19,7 +19,7 @@ window.FELADAT_ADATOK = {
         },
         {
           szam: 2,
-          sor: 1,
+          sor: 3,
           oszlop: 3,
           irany: "F",
           szo: "LEBEGÉS",
@@ -27,16 +27,16 @@ window.FELADAT_ADATOK = {
         },
         {
           szam: 3,
-          sor: 5,
+          sor: 9,
           oszlop: 3,
           irany: "V",
-          szo: "GRAVITÁCIÓ",
-          meghatarozas: "Ez a lefelé mutató erő tart egyensúlyt a felhajtóerővel úszáskor és lebegéskor."
+          szo: "SŰRŰSÉG",
+          meghatarozas: "Ettől a fizikai mennyiségtől függ, hogy egy adott test úszik, lebeg vagy elmerül a folyadékban."
         },
         {
           szam: 4,
           sor: 1,
-          oszlop: 8,
+          oszlop: 10,
           irany: "F",
           szo: "TÉRFOGAT",
           meghatarozas: "A kiszorított folyadéknak ez a mennyisége megegyezik a test bemerülő részének méretével."
@@ -44,10 +44,10 @@ window.FELADAT_ADATOK = {
         {
           szam: 5,
           sor: 7,
-          oszlop: 8,
+          oszlop: 7,
           irany: "V",
-          szo: "TENGELYLÁDA",
-          meghatarozas: "A hajók oldalára festett jelzés, amely a biztonságos merülési mélységet mutatja különböző vizekben."
+          szo: "ÁTLAGSŰRŰSÉG",
+          meghatarozas: "Ez határozza meg, hogy a sok levegőt tartalmazó acélhajó a víz felszínén marad-e."
         }
       ]
     },
@@ -171,4 +171,5 @@ window.FELADAT_ADATOK = {
       szoveg: "Amikor a tengeralattjáró le akar merülni, kinyitja a szelepeket, és vizet enged a ballaszttartályokba. Ezzel megnő a hajó tömege és [átlagsűrűsége|sűrűsége], miközben a külső térfogata (és így a rá ható felhajtóerő) nem változik. Amint a lefelé ható gravitációs erő nagyobb lesz, mint a [felhajtóerő|felhajtó], a hajó merülni kezd. Ha újra a felszínre akar emelkedni, sűrített [levegővel|levegőt] kiszorítja a vizet a tartályokból, így a hajó könnyebbé válik és felemelkedik."
     }
   ]
+
 };
