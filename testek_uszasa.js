@@ -168,8 +168,9 @@ window.FELADAT_ADATOK = {
       pont: 4,
       leiras: "Egészítsd ki a tengeralattjáró merülésének és felemelkedésének fizikai magyarázatát!",
       szituacio: "A tengeralattjárók kettős hajótesttel rendelkeznek. A két fal között úgynevezett ballaszttartályok találhatók, amelyekbe tengervizet engedhetnek, vagy sűrített levegővel kinyomhatják belőlük a vizet.",
-      szoveg: "Amikor a tengeralattjáró le akar merülni, kinyitja a szelepeket, és vizet enged a ballaszttartályokba. Ezzel megnő a hajó tömege és [átlagsűrűsége|sűrűsége], miközben a külső térfogata (és így a rá ható felhajtóerő) nem változik. Amint a lefelé ható gravitációs erő nagyobb lesz, mint a [felhajtóerő|felhajtó], a hajó merülni kezd. Ha újra a felszínre akar emelkedni, sűrített [levegővel|levegőt] kiszorítja a vizet a tartályokból, így a hajó könnyebbé válik és felemelkedik."
+      szoveg: "Amikor a tengeralattjáró le akar merülni, kinyitja a szelepeket, és vizet enged a ballaszttartályokba. Ezzel megnő a hajó tömege és [átlagsűrűsége|sűrűsége], miközben a külső térfogata (és így a rá ható felhajtóerő) nem változik. Amint a lefelé ható gravitációs erő nagyobb lesz, mint a [felhajtóerő|felhajtó], a hajó merülni kezd. Ha a tengeralattjátó újra a felszínre akar emelkedni, akkor a sűrített [levegővel|levegőt] kiszorítják a vizet a tartályokból, így a hajó könnyebbé válik és felemelkedik."
     }
   ]
 
 };
+
