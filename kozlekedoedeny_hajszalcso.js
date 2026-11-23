@@ -169,10 +169,7 @@ window.FELADAT_ADATOK = {
         { szoveg: "A csővezetékekben a víz a hajszálcsövesség miatt áramlik felfelé a házakba.", helyes: false }
       ]
     },
- {
-      cim: "6. Mezőgazdasági öntözés és talajművelés (Kompetenciaalapú sorrendalkotás)",
-      tipus: "order",
-	  {
+    {
       cim: "6. Mezőgazdasági öntözés és talajművelés (Kompetenciaalapú sorrendalkotás)",
       tipus: "order",
       pont: 4,
