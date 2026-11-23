@@ -20,7 +20,7 @@ window.FELADAT_ADATOK = {
         {
           szam: 2,
           sor: 1,
-          oszlop: 5,
+          oszlop: 9,
           irany: "F",
           szo: "HIGANY",
           meghatarozas: "Ez a folyékony fém nem nedvesíti az üveget, ezért a hajszálcsőben süllyed a szintje."
@@ -28,26 +28,26 @@ window.FELADAT_ADATOK = {
         {
           szam: 3,
           sor: 5,
-          oszlop: 3,
+          oszlop: 9,
           irany: "V",
-          szo: "SZIFON",
-          meghatarozas: "A mosdókagyló alatti, U-alakban hajlított csőszakasz, amely a közlekedőedények elvén zárja el a csatornaszagot."
+          szo: "NYOMÁS",
+          meghatarozas: "A közlekedőedény minden ágában azonos mélységben pontosan ekkora a hidrosztatikai..."
         },
         {
           szam: 4,
           sor: 1,
-          oszlop: 11,
+          oszlop: 2,
           irany: "F",
-          szo: "SŰRŰSÉG",
-          meghatarozas: "Ettől a fizikai mennyiségtől függ, hogy két nem keveredő folyadék milyen magasan áll meg egy U-cső két szárában."
+          szo: "TAPADÁS",
+          meghatarozas: "A folyadék és az edény fala között fellépő vonzó kölcsönhatás (adhézió), amely nedvesítéskor erősebb a kohéziónál."
         },
         {
           szam: 5,
           sor: 7,
-          oszlop: 7,
+          oszlop: 2,
           irany: "V",
-          szo: "VÍZTORONY",
-          meghatarozas: "Magasra épített víztározó, amely a település csőhálózatával közlekedőedényt alkotva biztosítja a víznyomást."
+          szo: "SŰRŰSÉG",
+          meghatarozas: "Ettől a fizikai mennyiségtől függ, hogy két nem keveredő folyadék milyen magasan áll meg egy U-cső két szárában."
         }
       ]
     },
@@ -184,3 +184,4 @@ window.FELADAT_ADATOK = {
     }
   ]
 };
+
