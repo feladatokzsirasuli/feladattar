@@ -8,7 +8,7 @@ window.FELADAT_ADATOK = {
       tipus: "drag_words",
       pont: 4,
       leiras: "Egészítsd ki a fényvisszaverődés törvényére vonatkozó megállapításokat a megadott szavakkal!",
-      szoveg: "A sima felületre érkező fénysugarat beeső fénysugárnak nevezzük. A beesési pontban a tükör felületére állított merőleges egyenes a *beesési merőleges*. A beeső fénysugár és e merőleges által bezárt szög a *beesési szög*. A visszaverődés törvénye kimondja, hogy a visszaverődési szög mindig *egyenlő* a beesési szöggel, továbbá a beeső fénysugár, a beesési merőleges és a visszavert fénysugár egy *síkban* fekszik.",
+      szoveg: "A tükröző felületre érkező fénysugarat beeső fénysugárnak nevezzük. A beesési pontban a tükör felületére állított merőleges egyenes a *beesési merőleges*. A beeső fénysugár és e merőleges által bezárt szög a *beesési szög*. A visszaverődés törvénye kimondja, hogy a visszaverődési szög mindig *egyenlő* a beesési szöggel, továbbá a beeső fénysugár, a beesési merőleges és a visszavert fénysugár egy *síkban* fekszik.",
       extra: ["tükörsík", "nagyobb", "kisebb", "térben", "törési szög"]
     },
     {
@@ -21,12 +21,12 @@ window.FELADAT_ADATOK = {
         "A képre vonatkozó adatok (k, K)"
       ],
       elemek: [
-        { szoveg: "A tükör síkja és a megvilágított test közötti távolság (t).", csoport: 0 },
-        { szoveg: "A tükör mögött látszólagosan megjelenő alakzat mérete (K).", csoport: 1 },
-        { szoveg: "A valódi test fizikai magassága (T).", csoport: 0 },
-        { szoveg: "A látszólagos kép és a tükör síkja közötti távolság (k).", csoport: 1 },
-        { szoveg: "Értéke látszólagos kép esetén negatív előjellel is szerepelhet a számításokban (k).", csoport: 1 },
-        { szoveg: "Ha a tárgyat 10 cm-rel közelebb visszük a tükörhöz, ez az érték csökken 10 cm-rel (t).", csoport: 0 }
+        { szoveg: "A tükör síkja és a megvilágított test közötti távolság.", csoport: 0 },
+        { szoveg: "A tükör mögött látszólagosan megjelenő alakzat mérete.", csoport: 1 },
+        { szoveg: "A valódi test fizikai magassága.", csoport: 0 },
+        { szoveg: "A látszólagos kép és a tükör síkja közötti távolság.", csoport: 1 },
+        { szoveg: "Értéke látszólagos kép esetén negatív előjellel is szerepelhet a számításokban.", csoport: 1 },
+        { szoveg: "Ha a tárgyat 10 cm-rel közelebb visszük a tükörhöz, ez az érték csökken 10 cm-rel.", csoport: 0 }
       ]
     },
     {
@@ -106,11 +106,11 @@ window.FELADAT_ADATOK = {
       pont: 4,
       leiras: "Állítsd helyes logikai sorrendbe egy pontszerű tárgy (T) síktükör által alkotott képének (K) szerkesztési lépéseit!",
       lepesek: [
-        "1. A tárgyból (T) két különböző irányú, a tükör felületét elérő beeső fénysugarat rajzolunk.",
-        "2. Mindkét beesési pontban merőlegest állítunk a tükör síkjára (beesési merőlegesek).",
-        "3. A fényvisszaverődés törvényét alkalmazva (α = α') megszerkesztjük a két visszavert fénysugarat.",
-        "4. A széttartó visszavert fénysugarakat szaggatott vonallal meghosszabbítjuk a tükör mögé.",
-        "5. A meghosszabbított egyenesek metszéspontjában kijelöljük a látszólagos képpontot (K)."
+        "A tárgyból (T) két különböző irányú, a tükör felületét elérő beeső fénysugarat rajzolunk.",
+        "Mindkét beesési pontban merőlegest állítunk a tükör síkjára (beesési merőlegesek).",
+        "A fényvisszaverődés törvényét alkalmazva (α = α') megszerkesztjük a két visszavert fénysugarat.",
+        "A széttartó visszavert fénysugarakat szaggatott vonallal meghosszabbítjuk a tükör mögé.",
+        "A meghosszabbított egyenesek metszéspontjában kijelöljük a látszólagos képpontot (K)."
       ]
     },
     {
